@@ -23,16 +23,8 @@ jobs:
 
       - name: Install, build, and upload site
         uses: withastro/action@v3
-
-      - name: CNAME + nojekyll
-        run: |
-          printf 'kubetee.ai\n' > dist/CNAME
-          touch dist/.nojekyll
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
+        # CNAME + .nojekyll live in public/ so Astro copies them into dist/
+        # inside the action's own upload-pages-artifact step.
 
   deploy:
     needs: build
