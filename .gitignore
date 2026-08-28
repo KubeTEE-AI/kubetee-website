@@ -1,0 +1,25 @@
+# build output
+dist/
+# generated types
+.astro/
+
+# dependencies
+node_modules/
+
+# logs
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# environment variables
+.env
+.env.production
+
+# macOS
+.DS_Store
+
+# jetbrains / vscode
+.idea/
+.vscode/
