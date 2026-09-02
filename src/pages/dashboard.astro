@@ -1,0 +1,423 @@
+---
+import Layout from '../layouts/Layout.astro';
+import raw from '../data/dashboard.json';
+
+const title = 'Revenue Dashboard — KubeTEE';
+const description =
+  'Live on-chain evidence of external inference revenue earned on sayGM (SN28), swapped to SN90 and recycled daily — plus every hotkey registered on SN28.';
+
+// Recycle data
+const fills = raw.recycle.fills;
+const totals = raw.recycle.totals;
+const firstFill = fills.length > 0 ? new Date(fills[fills.length - 1].ts) : null;
+const lastFill = fills.length > 0 ? new Date(fills[0].ts) : null;
+const days =
+  firstFill && lastFill
+    ? Math.max(1, Math.round((lastFill - firstFill) / 86400000))
+    : 0;
+const avgUsdPerDay = days > 0 ? totals.usdValue / days : 0;
+
+const fmtUsd = (v) =>
+  v >= 1000
+    ? `$${(v / 1000).toFixed(v >= 10000 ? 0 : 1)}k`
+    : `$${v.toFixed(0)}`;
+const fmtAlpha = (v) =>
+  v >= 1000 ? `${(v / 1000).toFixed(1)}k` : v.toFixed(1);
+const fmtTs = (ts) =>
+  new Date(ts).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+  });
+
+// SN28 metagraph — sorted by daily mining emission, our hotkey pinned visible
+const hotkeys = [...raw.sn28.hotkeys].sort(
+  (a, b) => (b.dailyMiningAlpha ?? 0) - (a.dailyMiningAlpha ?? 0),
+);
+const kubeUid = hotkeys.find((h) => h.isKubeTEE);
+const topHotkeys = hotkeys.filter((h) => !h.isKubeTEE).slice(0, 14);
+// Always show ours + context around it
+const kubeIdx = hotkeys.findIndex((h) => h.isKubeTEE);
+const around = hotkeys.slice(Math.max(0, kubeIdx - 2), kubeIdx + 3);
+const tableRows = [...topHotkeys, ...around].filter(
+  (h, i, arr) => arr.findIndex((x) => x.uid === h.uid) === i,
+);
+
+const generatedAt = new Date(raw.generatedAt);
+---
+
+<Layout title={title} description={description}>
+  <header>
+    <div class="container header-inner">
+      <a href="/" class="brand" aria-label="KubeTEE home">
+        <img src="/brand/logos/svg/Logo-7.svg" alt="KubeTEE" width="200" height="43" />
+      </a>
+      <nav aria-label="Primary">
+        <a href="/">Home</a>
+        <a href="https://github.com/KubeTEE-AI" class="nav-github" rel="noopener" target="_blank">
+          GitHub
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="dash-hero">
+      <div class="container">
+        <span class="section-label">On-chain revenue</span>
+        <h1>Recycled revenue, verifiable on-chain</h1>
+        <p class="hero-sub">
+          KubeTEE serves inference on sayGM (Bittensor SN28). The alpha earned
+          is swapped to SN90 and recycled — every day, in the open. Recycled
+          alpha returns to unissued supply; it never pays the subnet owner's
+          key. Every number below links to the chain.
+        </p>
+        <p class="data-note">
+          Data refreshed {generatedAt.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
+          · sources: <a href="https://taostats.io" rel="noopener">TaoStats</a>
+          · coldkey <code>{raw.coldkey.slice(0, 10)}…{raw.coldkey.slice(-6)}</code>
+        </p>
+      </div>
+    </section>
+
+    <section class="stats">
+      <div class="container">
+        <div class="stat-grid">
+          <div class="stat-card">
+            <span class="stat-label">Total recycled</span>
+            <span class="stat-value">{fmtUsd(totals.usdValue)}</span>
+            <span class="stat-sub">since {firstFill ? fmtTs(firstFill) : '—'}</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Swap fills</span>
+            <span class="stat-value">{totals.count}</span>
+            <span class="stat-sub">SN28 α → SN90 α</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Average / day</span>
+            <span class="stat-value">{fmtUsd(avgUsdPerDay)}</span>
+            <span class="stat-sub">over {days} days</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">SN90 α recycled</span>
+            <span class="stat-value">{fmtAlpha(totals.sn90Alpha)}</span>
+            <span class="stat-sub">{fmtAlpha(totals.sn28Alpha)} SN28 α swapped</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="fills">
+      <div class="container">
+        <span class="section-label">Recycle history</span>
+        <h2>Every swap, with its extrinsic</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>SN28 α</th>
+                <th>→ SN90 α</th>
+                <th>TAO</th>
+                <th>USD</th>
+                <th>Extrinsic</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                fills.map((f) => (
+                  <tr>
+                    <td>{fmtTs(f.ts)}</td>
+                    <td class="num">{f.sn28Alpha.toFixed(1)}</td>
+                    <td class="num accent">{f.sn90Alpha.toFixed(1)}</td>
+                    <td class="num">{f.taoValue.toFixed(2)}</td>
+                    <td class="num">${f.usdValue.toFixed(0)}</td>
+                    <td>
+                      <a href={f.link} rel="noopener" class="mono" target="_blank">
+                        {f.extrinsic}
+                      </a>
+                    </td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+        <p class="table-note">
+          Each fill is a dTAO swap on the chain AMM followed by
+          <code>recycle_alpha</code> on netuid 90 — the alpha returns to
+          unissued supply. <a
+            href="https://github.com/KubeTEE-AI/kubetee-subnet/blob/main/docs/SN28-SN90-ALPHA-RECYCLE.md"
+            rel="noopener">How the recycler works</a>.
+        </p>
+      </div>
+    </section>
+
+    <section class="sn28">
+      <div class="container">
+        <span class="section-label">SN28 · sayGM</span>
+        <h2>Hotkeys on SN28</h2>
+        <p class="section-intro">
+          {raw.sn28.count} hotkeys registered on the sayGM subnet. Our miner
+          is highlighted — <a href="https://taostats.io/neurons?netuid=28&uid=44" rel="noopener">UID 44</a>,
+          earning from paid inference SKUs.
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>UID</th>
+                <th>Hotkey</th>
+                <th class="num">Incentive</th>
+                <th class="num">Daily mining α</th>
+                <th class="num">α stake</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                tableRows.map((h) => (
+                  <tr class={h.isKubeTEE ? 'row-us' : ''}>
+                    <td class="num">{h.uid}</td>
+                    <td>
+                      <a href={h.link} rel="noopener" class="mono" target="_blank">
+                        {h.hotkey.slice(0, 8)}…{h.hotkey.slice(-6)}
+                      </a>
+                      {h.isKubeTEE && <span class="tag">KubeTEE</span>}
+                    </td>
+                    <td class="num">{(h.incentive * 100).toFixed(2)}%</td>
+                    <td class="num">{(h.dailyMiningAlpha ?? 0).toFixed(1)}</td>
+                    <td class="num">{h.alphaStake.toFixed(1)}</td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+        <p class="table-note">
+          Top 14 by daily mining emission, plus our UID 44 with its
+          neighbourhood. Emission — not axon serving — is how the network
+          defines an active miner. Full list:
+          <a href="https://taostats.io/subnets/28" rel="noopener">taostats.io/subnets/28</a>.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <img src="/brand/logos/svg/Logo-7.svg" alt="KubeTEE" width="160" height="35" />
+        <p>
+          Confidential compute for SOTA AI services — secured by TEE, incentivized
+          by Bittensor.
+        </p>
+      </div>
+      <nav class="footer-links" aria-label="Footer">
+        <a href="https://saygm.com/" rel="noopener">sayGM</a>
+        <a href="https://s3.hippius.com/kubetee-validator/index.html" rel="noopener">
+          Validator dashboard
+        </a>
+        <a href="https://github.com/KubeTEE-AI" rel="noopener">GitHub</a>
+        <a href="https://discord.gg/7SsA8Jw5J" rel="noopener">Discord</a>
+        <a href="https://x.com/KubeTEEAI" rel="noopener">X</a>
+      </nav>
+    </div>
+    <div class="container footer-note">
+      <p>© {new Date().getFullYear()} KubeTEE AI</p>
+    </div>
+  </footer>
+</Layout>
+
+<style>
+  /* Header — matches index */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: rgba(14, 17, 22, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+  }
+  nav {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    font-size: 15px;
+    color: var(--text-muted);
+  }
+  nav a:hover { color: var(--text); }
+  .nav-github { color: var(--accent); }
+  .nav-github:hover { color: var(--accent-strong); }
+
+  /* Hero */
+  .dash-hero {
+    padding: 88px 0 56px;
+    border-bottom: 1px solid var(--border);
+    background:
+      radial-gradient(720px 280px at 70% -10%, rgba(131, 187, 123, 0.09), transparent 70%),
+      var(--bg);
+  }
+  .dash-hero h1 {
+    font-size: clamp(30px, 4.5vw, 44px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.12;
+    margin-bottom: 18px;
+  }
+  .hero-sub {
+    color: var(--text-muted);
+    font-size: 17px;
+    max-width: 700px;
+  }
+  .data-note {
+    margin-top: 18px;
+    font-size: 13px;
+    color: var(--text-faint);
+  }
+  .data-note a { color: var(--text-muted); text-decoration: underline; }
+  .data-note code, .mono {
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+
+  /* Stat cards */
+  .stats { padding: 48px 0 8px; }
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+  .stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .stat-label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+  .stat-value {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--accent);
+  }
+  .stat-sub { font-size: 13px; color: var(--text-muted); }
+
+  /* Tables */
+  .fills, .sn28 { padding: 56px 0; }
+  .fills { background: var(--bg-elevated); border-top: 1px solid var(--border); }
+  .sn28 { border-top: 1px solid var(--border); }
+  .table-wrap {
+    margin-top: 28px;
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg-card);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    min-width: 640px;
+  }
+  thead th {
+    text-align: left;
+    padding: 12px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-elevated);
+    white-space: nowrap;
+  }
+  tbody td {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: rgba(255, 255, 255, 0.02); }
+  .num { font-variant-numeric: tabular-nums; }
+  td.num, th.num { text-align: right; }
+  td.accent { color: var(--accent); font-weight: 600; }
+  tbody a { color: var(--text-muted); text-decoration: none; }
+  tbody a:hover { color: var(--accent); text-decoration: underline; }
+  .tag {
+    margin-left: 10px;
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--accent-subtle);
+    color: var(--accent);
+    border: 1px solid var(--accent-border);
+  }
+  .row-us {
+    background: rgba(131, 187, 123, 0.06);
+    outline: 1px solid var(--accent-border);
+    outline-offset: -1px;
+  }
+  .table-note {
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--text-faint);
+    max-width: 720px;
+  }
+  .table-note a { color: var(--text-muted); text-decoration: underline; }
+  .table-note code { font-family: var(--font-mono); font-size: 12px; }
+
+  /* Footer — matches index */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 48px 0 32px;
+    margin-top: 40px;
+  }
+  .footer-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 40px;
+    flex-wrap: wrap;
+  }
+  .footer-brand p {
+    color: var(--text-faint);
+    font-size: 14px;
+    margin-top: 14px;
+    max-width: 340px;
+  }
+  .footer-links {
+    display: flex;
+    gap: 28px;
+    font-size: 14.5px;
+    color: var(--text-muted);
+  }
+  .footer-links a:hover { color: var(--accent); }
+  .footer-note {
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+  .footer-note p { font-size: 13px; color: var(--text-faint); }
+
+  @media (max-width: 640px) {
+    .dash-hero { padding: 56px 0 40px; }
+    .footer-inner { flex-direction: column; }
+  }
+</style>
