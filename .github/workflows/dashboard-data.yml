@@ -42,6 +42,6 @@ jobs:
             echo "No data change."
           else
             git commit -m "data: refresh dashboard (auto)"
-            git pull --rebase "origin ${BRANCH}"
+            git pull --rebase origin "${BRANCH}"
             git push origin "HEAD:${BRANCH}"
           fi
