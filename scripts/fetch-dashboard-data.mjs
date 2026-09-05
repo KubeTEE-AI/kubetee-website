@@ -148,11 +148,11 @@ async function fetchSn28PoolPrice() {
   if (!row) return null;
   const price = Number(row.price);
   if (Number.isFinite(price) && price > 0) return price;
-  // fallback within the pool payload: tao_in_pool / alpha_in_pool
+  // fallback within the pool payload: total_tao (RAO) / alpha_in_pool (human-scale)
   const alpha = Number(row.alpha_in_pool);
-  const tao = Number(row.tao_in_pool);
+  const tao = Number(row.total_tao);
   if (Number.isFinite(alpha) && Number.isFinite(tao) && alpha > 0) {
-    return tao / alpha;
+    return (tao / 1e9) / alpha;
   }
   return null;
 }
@@ -180,7 +180,7 @@ async function evaluateSettle() {
   // S2 — skip day: stake below the recycler's minimum
   const stakeInfo = await fetchOurStake();
   let price = await fetchSn28PoolPrice();
-  if (price == null) price = sn28PriceFromFill(mapFill(newestFill));
+  if (price == null && newestFill) price = sn28PriceFromFill(mapFill(newestFill));
   if (
     stakeInfo.found
     && Number.isFinite(stakeInfo.stake)
@@ -193,36 +193,35 @@ async function evaluateSettle() {
   return { settled: false, reason: 'unsettled', fills, stakeInfo, price };
 }
 
-// --- 1. Recycle fills (SN28 -> SN90 swaps by our coldkey) ---
-// Amounts are in RAO (1 TAO = 1e9 RAO) and alpha units (1 alpha = 1e9).
-const fills = await getPaginated(
-  `/api/dtao/trade/v1?coldkey=${KUBETEE_COLDKEY}` +
-    `&from_name=SN28&to_name=SN90&order=timestamp_desc&limit=50`,
-);
-const recycle = fills.map((t) => ({
-  ts: t.timestamp,
-  block: t.block_number,
-  extrinsic: t.extrinsic_id,
-  sn28Alpha: Number(t.from_amount) / 1e9,
-  sn90Alpha: Number(t.to_amount) / 1e9,
-  taoValue: Number(t.tao_value) / 1e9,
-  usdValue: Number(t.usd_value),
-  link: `https://www.tao.app/extrinsic/${t.extrinsic_id}`,
-}));
+// --- Main flow ---
+async function pollUntilSettled() {
+  const deadline = Date.now() + SETTLE_WINDOW_MS;
+  let verdict;
+  for (;;) {
+    verdict = await evaluateSettle();
+    console.log(
+      `settle-check: reason=${verdict.reason} ` +
+        `newest=${verdict.fills[0]?.timestamp ?? 'none'} ` +
+        `stake=${verdict.stakeInfo?.stake ?? 'n/a'} price=${verdict.price ?? 'n/a'}`,
+    );
+    if (verdict.settled) return verdict;
+    if (Date.now() >= deadline) {
+      console.error(
+        `fetch-dashboard-data: settle window (${SETTLE_WINDOW_MS / 60000}min) expired ` +
+          'without S1 (today\u2019s fill) or S2 (stake below recycler minimum). ' +
+          'Not publishing stale data. Investigate: TaoStats indexer lag, or the ' +
+          'alpha-recycler CronJob failed with \u22651 TAO unswapped.',
+      );
+      process.exit(1);
+    }
+    await sleep(SETTLE_POLL_INTERVAL_MS);
+  }
+}
 
-const totals = recycle.reduce(
-  (acc, r) => ({
-    sn28Alpha: acc.sn28Alpha + r.sn28Alpha,
-    sn90Alpha: acc.sn90Alpha + r.sn90Alpha,
-    taoValue: acc.taoValue + r.taoValue,
-    usdValue: acc.usdValue + r.usdValue,
-  }),
-  { sn28Alpha: 0, sn90Alpha: 0, taoValue: 0, usdValue: 0 },
-);
+const settled = await pollUntilSettled();
 
-// --- 2. SN28 metagraph — every registered hotkey ---
-// Note: emission / daily_mining_alpha / alpha_stake are in RAO-scale units
-// (1e9 = 1.0). incentive is a 0..1 fraction.
+// Full fills fetch (all pages) + full metagraph fetch (once, post-settle)
+const fullFills = await getFills();
 const neurons = await getPaginated(
   '/api/metagraph/latest/v1?netuid=28&order=uid_asc&limit=50',
 );
@@ -243,6 +242,55 @@ const sn28 = neurons.map((n) => ({
   link: `https://taostats.io/neurons?netuid=28&uid=${n.uid}`,
 }));
 
+const recycle = fullFills.map(mapFill);
+const totals = recycle.reduce(
+  (acc, r) => ({
+    sn28Alpha: acc.sn28Alpha + r.sn28Alpha,
+    sn90Alpha: acc.sn90Alpha + r.sn90Alpha,
+    taoValue: acc.taoValue + r.taoValue,
+    usdValue: acc.usdValue + r.usdValue,
+  }),
+  { sn28Alpha: 0, sn90Alpha: 0, taoValue: 0, usdValue: 0 },
+);
+
+// --- Validation (atomic: nothing written unless all pass) ---
+if (!Array.isArray(recycle) || recycle.length === 0) {
+  console.error('fetch-dashboard-data: fills empty or not an array');
+  process.exit(1);
+}
+if (sn28.length < METAGRAPH_SANITY_FLOOR) {
+  console.error(
+    `fetch-dashboard-data: metagraph count ${sn28.length} < floor ${METAGRAPH_SANITY_FLOOR}`,
+  );
+  console.error('Possible pagination breakage — not writing.');
+  process.exit(1);
+}
+if (!sn28.some((n) => n.isKubeTEE)) {
+  console.error(
+    `fetch-dashboard-data: our hotkey ${KUBETEE_SN28_HOTKEY.slice(0, 8)}… not found in metagraph`,
+  );
+  process.exit(1);
+}
+if (
+  settled.reason === 'S2'
+  && !(Number.isFinite(settled.stakeInfo?.stake) && Number.isFinite(settled.price))
+) {
+  console.error('fetch-dashboard-data: S2 settle with non-finite stake/price');
+  process.exit(1);
+}
+
+if (DRY_RUN) {
+  console.log('dry-run: settled, not writing. Verdict:', {
+    reason: settled.reason,
+    newestFill: fullFills[0]?.timestamp ?? 'none',
+    fillCount: recycle.length,
+    hotkeyCount: sn28.length,
+    stake: settled.stakeInfo?.stake ?? 'n/a',
+    price: settled.price ?? 'n/a',
+  });
+  process.exit(0);
+}
+
 mkdirSync(dirname(OUT), { recursive: true });
 const payload = {
   generatedAt: new Date().toISOString(),
@@ -261,6 +309,6 @@ const payload = {
 };
 writeFileSync(OUT, JSON.stringify(payload, null, 2) + '\n');
 console.log(
-  `fetch-dashboard-data: ${recycle.length} recycle fills, ` +
+  `fetch-dashboard-data: settled=${settled.reason} ${recycle.length} fills, ` +
     `${sn28.length} SN28 hotkeys -> ${OUT}`,
 );
