@@ -102,6 +102,97 @@ async function getPaginated(path, maxPages = 5) {
   return all;
 }
 
+// --- Settle logic ---
+// S1: today's recycle fill is visible (newest fill >= today 00:00 UTC - slack)
+// S2: legitimate skip day — our SN28 stake x price < MIN_ORIGIN_TAO
+
+async function getFills({ light = false } = {}) {
+  // light mode (settle polling): page 1 only — enough to check the newest fill.
+  // Full mode (post-settle): all pages (limit 50/page, max 5).
+  const path =
+    `/api/dtao/trade/v1?coldkey=${KUBETEE_COLDKEY}` +
+    `&from_name=SN28&to_name=SN90&order=timestamp_desc&limit=50`;
+  if (light) {
+    const { data } = await get(`${path}&page=1`);
+    return data;
+  }
+  return getPaginated(path);
+}
+
+function todayUtcMidnight() {
+  const now = new Date();
+  return Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+}
+
+function mapFill(t) {
+  return {
+    ts: t.timestamp,
+    block: t.block_number,
+    extrinsic: t.extrinsic_id,
+    sn28Alpha: Number(t.from_amount) / 1e9,
+    sn90Alpha: Number(t.to_amount) / 1e9,
+    taoValue: Number(t.tao_value) / 1e9,
+    usdValue: Number(t.usd_value),
+    link: `https://www.tao.app/extrinsic/${t.extrinsic_id}`,
+  };
+}
+
+function sn28PriceFromFill(fill) {
+  if (!fill || !fill.sn28Alpha || fill.sn28Alpha <= 0) return null;
+  return fill.taoValue / fill.sn28Alpha;
+}
+
+async function fetchSn28PoolPrice() {
+  const { data } = await get('/api/dtao/pool/latest/v1?netuid=28');
+  const row = data?.[0];
+  if (!row) return null;
+  const price = Number(row.price);
+  if (Number.isFinite(price) && price > 0) return price;
+  // fallback within the pool payload: tao_in_pool / alpha_in_pool
+  const alpha = Number(row.alpha_in_pool);
+  const tao = Number(row.tao_in_pool);
+  if (Number.isFinite(alpha) && Number.isFinite(tao) && alpha > 0) {
+    return tao / alpha;
+  }
+  return null;
+}
+
+async function fetchOurStake() {
+  // metagraph page 1 (uid_asc, limit 50) — UID 44 is on page 1
+  const { data } = await get(
+    '/api/metagraph/latest/v1?netuid=28&order=uid_asc&limit=50&page=1',
+  );
+  const ours = data.find((n) => n.hotkey?.ss58 === KUBETEE_SN28_HOTKEY);
+  if (!ours) return { found: false, stake: null };
+  return { found: true, stake: Number(ours.total_alpha_stake) / 1e9 };
+}
+
+async function evaluateSettle() {
+  const fills = await getFills({ light: true });
+  const newestFill = fills[0] ?? null;
+  const cutoff = todayUtcMidnight() - RECYCLE_RUN_SLACK_MS;
+
+  // S1 — today's fill is visible
+  if (newestFill && Date.parse(newestFill.timestamp) >= cutoff) {
+    return { settled: true, reason: 'S1', fills, stakeInfo: null, price: null };
+  }
+
+  // S2 — skip day: stake below the recycler's minimum
+  const stakeInfo = await fetchOurStake();
+  let price = await fetchSn28PoolPrice();
+  if (price == null) price = sn28PriceFromFill(mapFill(newestFill));
+  if (
+    stakeInfo.found
+    && Number.isFinite(stakeInfo.stake)
+    && Number.isFinite(price)
+    && stakeInfo.stake * price < MIN_ORIGIN_TAO
+  ) {
+    return { settled: true, reason: 'S2', fills, stakeInfo, price };
+  }
+
+  return { settled: false, reason: 'unsettled', fills, stakeInfo, price };
+}
+
 // --- 1. Recycle fills (SN28 -> SN90 swaps by our coldkey) ---
 // Amounts are in RAO (1 TAO = 1e9 RAO) and alpha units (1 alpha = 1e9).
 const fills = await getPaginated(
