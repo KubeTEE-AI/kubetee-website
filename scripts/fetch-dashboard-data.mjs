@@ -53,8 +53,10 @@ async function getOnce(path) {
     const body = await res.text().catch(() => '');
     const err = new Error(`GET ${path} -> ${res.status} ${body}`);
     err.status = res.status;
-    err.retryAfterMs = res.headers.get('retry-after')
-      ? Number(res.headers.get('retry-after')) * 1000
+    const raRaw = res.headers.get('retry-after');
+    const raSeconds = raRaw != null ? Number(raRaw) : NaN;
+    err.retryAfterMs = Number.isFinite(raSeconds) && raSeconds > 0
+      ? Math.min(raSeconds * 1000, 60_000)
       : null;
     throw err;
   }
@@ -72,7 +74,8 @@ async function get(path) {
       const retriable = err.name === 'TimeoutError'
         || err.name === 'AbortError'
         || (err.status >= 500)
-        || (err.status === 429);
+        || (err.status === 429)
+        || (err instanceof TypeError); // fetch network errors: ECONNREFUSED/ECONNRESET/DNS — no .status
       if (!retriable || attempt === MAX_ATTEMPTS) throw err;
       const delay = err.retryAfterMs
         ?? BACKOFF_BASE_MS * 3 ** (attempt - 1);
