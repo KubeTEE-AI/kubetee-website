@@ -8,14 +8,19 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: dashboard-data
+  cancel-in-progress: false
+
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    timeout-minutes: 180
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Fetch on-chain data
+      - name: Fetch on-chain data (settle window up to 2h)
         run: node scripts/fetch-dashboard-data.mjs
         env:
           TAOSTATS_API_KEY: ${{ secrets.TAOSTATS_API_KEY }}
@@ -29,5 +34,6 @@ jobs:
             echo "No data change."
           else
             git commit -m "data: refresh dashboard (auto)"
+            git pull --rebase origin main
             git push
           fi
