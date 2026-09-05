@@ -271,6 +271,11 @@ const totals = recycle.reduce(
   { sn28Alpha: 0, sn90Alpha: 0, taoValue: 0, usdValue: 0 },
 );
 
+// Our hotkey's metagraph row — the only one stored/published (2026-09-05
+// amendment: SN28 section shows only our miner). Validation still runs on
+// the FULL metagraph.
+const ourRow = sn28.find((n) => n.isKubeTEE);
+
 // --- Validation (atomic: nothing written unless all pass) ---
 if (!Array.isArray(recycle) || recycle.length === 0) {
   console.error('fetch-dashboard-data: fills empty or not an array');
@@ -322,11 +327,11 @@ const payload = {
   },
   sn28: {
     count: sn28.length,
-    hotkeys: sn28,
+    hotkeys: ourRow ? [ourRow] : [],
   },
 };
 writeFileSync(OUT, JSON.stringify(payload, null, 2) + '\n');
 console.log(
   `fetch-dashboard-data: settled=${settled.reason} ${recycle.length} fills, ` +
-    `${sn28.length} SN28 hotkeys -> ${OUT}`,
+    `${sn28.length} SN28 hotkeys (${ourRow ? 'ours only published' : 'OURS MISSING'}) -> ${OUT}`,
 );

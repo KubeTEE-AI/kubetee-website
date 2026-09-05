@@ -29,18 +29,8 @@ const fmtTs = (ts) =>
     day: 'numeric',
   });
 
-// SN28 metagraph — sorted by daily mining emission, our hotkey pinned visible
-const hotkeys = [...raw.sn28.hotkeys].sort(
-  (a, b) => (b.dailyMiningAlpha ?? 0) - (a.dailyMiningAlpha ?? 0),
-);
-const kubeUid = hotkeys.find((h) => h.isKubeTEE);
-const topHotkeys = hotkeys.filter((h) => !h.isKubeTEE).slice(0, 14);
-// Always show ours + context around it
-const kubeIdx = hotkeys.findIndex((h) => h.isKubeTEE);
-const around = hotkeys.slice(Math.max(0, kubeIdx - 2), kubeIdx + 3);
-const tableRows = [...topHotkeys, ...around].filter(
-  (h, i, arr) => arr.findIndex((x) => x.uid === h.uid) === i,
-);
+// SN28 metagraph — only our miner is shown (2026-09-05 amendment)
+const kube = raw.sn28.hotkeys.find((h) => h.isKubeTEE) ?? raw.sn28.hotkeys[0];
 
 const generatedAt = new Date(raw.generatedAt);
 ---
@@ -155,47 +145,44 @@ const generatedAt = new Date(raw.generatedAt);
     <section class="sn28">
       <div class="container">
         <span class="section-label">SN28 · sayGM</span>
-        <h2>Hotkeys on SN28</h2>
+        <h2>Our miner on SN28</h2>
         <p class="section-intro">
-          {raw.sn28.count} hotkeys registered on the sayGM subnet. Our miner
-          is highlighted — <a href="https://taostats.io/neurons?netuid=28&uid=44" rel="noopener">UID 44</a>,
-          earning from paid inference SKUs.
+          {raw.sn28.count} hotkeys registered on the sayGM subnet. KubeTEE serves
+          paid inference SKUs with our confidential miner.
         </p>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>UID</th>
-                <th>Hotkey</th>
-                <th class="num">Incentive</th>
-                <th class="num">Daily mining α</th>
-                <th class="num">α stake</th>
-              </tr>
-            </thead>
-            <tbody>
-              {
-                tableRows.map((h) => (
-                  <tr class={h.isKubeTEE ? 'row-us' : ''}>
-                    <td class="num">{h.uid}</td>
-                    <td>
-                      <a href={h.link} rel="noopener" class="mono" target="_blank">
-                        {h.hotkey.slice(0, 8)}…{h.hotkey.slice(-6)}
-                      </a>
-                      {h.isKubeTEE && <span class="tag">KubeTEE</span>}
-                    </td>
-                    <td class="num">{(h.incentive * 100).toFixed(2)}%</td>
-                    <td class="num">{(h.dailyMiningAlpha ?? 0).toFixed(1)}</td>
-                    <td class="num">{h.alphaStake.toFixed(1)}</td>
-                  </tr>
-                ))
-              }
-            </tbody>
-          </table>
-        </div>
+        {kube && (
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>UID</th>
+                  <th>Hotkey</th>
+                  <th class="num">Incentive</th>
+                  <th class="num">Daily mining α</th>
+                  <th class="num">α stake</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="row-us">
+                  <td class="num">{kube.uid}</td>
+                  <td>
+                    <a href={kube.link} rel="noopener" class="mono" target="_blank">
+                      {kube.hotkey.slice(0, 8)}…{kube.hotkey.slice(-6)}
+                    </a>
+                    <span class="tag">KubeTEE</span>
+                  </td>
+                  <td class="num">{(kube.incentive * 100).toFixed(2)}%</td>
+                  <td class="num">{(kube.dailyMiningAlpha ?? 0).toFixed(1)}</td>
+                  <td class="num">{kube.alphaStake.toFixed(1)}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        )}
         <p class="table-note">
-          Top 14 by daily mining emission, plus our UID 44 with its
-          neighbourhood. Emission — not axon serving — is how the network
-          defines an active miner. Full list:
+          Our miner is the only one shown — this dashboard tracks KubeTEE's
+          revenue on sayGM, not the whole subnet. Emission — not axon serving —
+          is how the network defines an active miner. Full subnet list:
           <a href="https://taostats.io/subnets/28" rel="noopener">taostats.io/subnets/28</a>.
         </p>
       </div>
