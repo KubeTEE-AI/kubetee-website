@@ -19,6 +19,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # Full history: git pull --rebase needs a merge base. Shallow
+          # clones (the default fetch-depth: 1) give bogus add/add conflicts.
+          fetch-depth: 0
 
       - name: Fetch on-chain data (settle window up to 2h)
         run: node scripts/fetch-dashboard-data.mjs
@@ -26,6 +30,10 @@ jobs:
           TAOSTATS_API_KEY: ${{ secrets.TAOSTATS_API_KEY }}
 
       - name: Commit if changed
+        env:
+          # Runtime env var (not a ${{ }} interpolation) — safe from command
+          # injection; also correct on feature-branch workflow_dispatch runs.
+          BRANCH: ${{ github.ref_name }}
         run: |
           git config user.name "kubetee-bot"
           git config user.email "bot@kubetee.ai"
@@ -34,6 +42,6 @@ jobs:
             echo "No data change."
           else
             git commit -m "data: refresh dashboard (auto)"
-            git pull --rebase origin main
-            git push
+            git pull --rebase "origin ${BRANCH}"
+            git push origin "HEAD:${BRANCH}"
           fi
