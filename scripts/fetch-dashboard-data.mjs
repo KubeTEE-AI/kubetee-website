@@ -89,6 +89,8 @@ async function get(path) {
   throw lastErr;
 }
 
+// TODO: maxPages=5 caps the metagraph at 250 hotkeys (50/page) and fills at 250
+// rows. SN28 is at 250/256 slots — bump maxPages when the subnet fills up.
 async function getPaginated(path, maxPages = 5) {
   const all = [];
   let page = 1;
@@ -196,9 +198,25 @@ async function evaluateSettle() {
 // --- Main flow ---
 async function pollUntilSettled() {
   const deadline = Date.now() + SETTLE_WINDOW_MS;
-  let verdict;
   for (;;) {
-    verdict = await evaluateSettle();
+    let verdict;
+    try {
+      verdict = await evaluateSettle();
+    } catch (err) {
+      if (Date.now() >= deadline) {
+        console.error(
+          'fetch-dashboard-data: settle window expired with API errors — ' +
+            `last error: ${err.message}`,
+        );
+        process.exit(1);
+      }
+      console.warn(
+        `fetch-dashboard-data: settle-check failed (${err.message}); ` +
+          `retrying in ${SETTLE_POLL_INTERVAL_MS / 60000}min`,
+      );
+      await sleep(SETTLE_POLL_INTERVAL_MS);
+      continue;
+    }
     console.log(
       `settle-check: reason=${verdict.reason} ` +
         `newest=${verdict.fills[0]?.timestamp ?? 'none'} ` +
