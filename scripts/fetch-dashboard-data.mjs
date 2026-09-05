@@ -17,6 +17,18 @@ const OUT = join(__dirname, '..', 'src', 'data', 'dashboard.json');
 
 const API = 'https://api.taostats.io';
 const KEY = process.env.TAOSTATS_API_KEY;
+const DRY_RUN = process.argv.includes('--dry-run');
+
+// --- Tunables (see docs/superpowers/specs/2026-09-05-dashboard-auto-update-design.md) ---
+const REQUEST_TIMEOUT_MS = 30_000;   // per-request timeout
+const MAX_ATTEMPTS = 3;              // per-request retry cap
+const BACKOFF_BASE_MS = 5_000;       // 5s -> 15s -> 45s
+const SETTLE_POLL_INTERVAL_MS = 15 * 60_000;  // 15 min between settle polls
+const SETTLE_WINDOW_MS = 2 * 60 * 60_000;     // 2h settle window
+const RECYCLE_RUN_SLACK_MS = 30 * 60_000;     // slack before today's 00:00 UTC
+const MIN_ORIGIN_TAO = 1.0;          // recycler's MIN_ORIGIN_TAO
+const METAGRAPH_SANITY_FLOOR = 100;  // hotkey count sanity floor (~250 today)
+
 if (!KEY) {
   console.error('fetch-dashboard-data: TAOSTATS_API_KEY not set');
   process.exit(1);
