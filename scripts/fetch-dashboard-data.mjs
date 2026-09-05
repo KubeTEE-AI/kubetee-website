@@ -22,7 +22,7 @@ const DRY_RUN = process.argv.includes('--dry-run');
 // --- Tunables (see docs/superpowers/specs/2026-09-05-dashboard-auto-update-design.md) ---
 const REQUEST_TIMEOUT_MS = 30_000;   // per-request timeout
 const MAX_ATTEMPTS = 3;              // per-request retry cap
-const BACKOFF_BASE_MS = 5_000;       // 5s -> 15s -> 45s
+const BACKOFF_BASE_MS = 5_000;       // 5s -> 15s (with MAX_ATTEMPTS=3)
 const SETTLE_POLL_INTERVAL_MS = 15 * 60_000;  // 15 min between settle polls
 const SETTLE_WINDOW_MS = 2 * 60 * 60_000;     // 2h settle window
 const RECYCLE_RUN_SLACK_MS = 30 * 60_000;     // slack before today's 00:00 UTC
@@ -41,15 +41,49 @@ const KUBETEE_COLDKEY = '5C9y6fnLPSzBeh1Np7f4DnGen42xV29nL9qZTDuwpVC4iTEE';
 const KUBETEE_SN28_HOTKEY =
   '5EvosuiYGEf8xqDfHVyQcyPD1BjN1fDjyqLdhHMRMawPo42Y';
 
-async function get(path) {
+// --- HTTP layer with retry (timeout, 429 Retry-After, 5xx backoff) ---
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+async function getOnce(path) {
   const res = await fetch(`${API}${path}`, {
     headers: { Accept: 'application/json', Authorization: KEY },
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   });
   if (!res.ok) {
-    throw new Error(`GET ${path} -> ${res.status} ${await res.text()}`);
+    const body = await res.text().catch(() => '');
+    const err = new Error(`GET ${path} -> ${res.status} ${body}`);
+    err.status = res.status;
+    err.retryAfterMs = res.headers.get('retry-after')
+      ? Number(res.headers.get('retry-after')) * 1000
+      : null;
+    throw err;
   }
   const json = await res.json();
   return { data: json.data ?? [], pagination: json.pagination ?? null };
+}
+
+async function get(path) {
+  let lastErr;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    try {
+      return await getOnce(path);
+    } catch (err) {
+      lastErr = err;
+      const retriable = err.name === 'TimeoutError'
+        || err.name === 'AbortError'
+        || (err.status >= 500)
+        || (err.status === 429);
+      if (!retriable || attempt === MAX_ATTEMPTS) throw err;
+      const delay = err.retryAfterMs
+        ?? BACKOFF_BASE_MS * 3 ** (attempt - 1);
+      console.warn(
+        `fetch-dashboard-data: GET ${path} failed (${err.message}), ` +
+          `retry ${attempt}/${MAX_ATTEMPTS - 1} in ${Math.round(delay / 1000)}s`,
+      );
+      await sleep(delay);
+    }
+  }
+  throw lastErr;
 }
 
 async function getPaginated(path, maxPages = 5) {
