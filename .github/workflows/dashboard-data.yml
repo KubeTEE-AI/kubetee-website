@@ -7,6 +7,11 @@ on:
 
 permissions:
   contents: write
+  # Needed to dispatch deploy.yml with GITHUB_TOKEN. Pushes made with
+  # GITHUB_TOKEN do NOT trigger other workflows (GitHub anti-recursion);
+  # workflow_dispatch is the documented exception. Without this, data
+  # commits land on main but the Pages site never rebuilds.
+  actions: write
 
 concurrency:
   group: dashboard-data
@@ -34,6 +39,7 @@ jobs:
           # Runtime env var (not a ${{ }} interpolation) — safe from command
           # injection; also correct on feature-branch workflow_dispatch runs.
           BRANCH: ${{ github.ref_name }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           git config user.name "kubetee-bot"
           git config user.email "bot@kubetee.ai"
@@ -44,4 +50,11 @@ jobs:
             git commit -m "data: refresh dashboard (auto)"
             git pull --rebase origin "${BRANCH}"
             git push origin "HEAD:${BRANCH}"
+            # GITHUB_TOKEN pushes don't trigger deploy.yml (anti-recursion) —
+            # dispatch it explicitly. Only for main runs; feature-branch test
+            # dispatches must not touch the live site.
+            if [ "${BRANCH}" = "main" ]; then
+              gh workflow run deploy.yml --repo "${GITHUB_REPOSITORY}" --ref main
+              echo "Dispatched deploy.yml for main."
+            fi
           fi
