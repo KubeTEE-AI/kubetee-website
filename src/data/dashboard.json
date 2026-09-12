@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-11T06:02:23.941Z",
+  "generatedAt": "2026-09-12T05:49:45.256Z",
   "coldkey": "5C9y6fnLPSzBeh1Np7f4DnGen42xV29nL9qZTDuwpVC4iTEE",
   "recycle": {
     "fills": [
@@ -139,10 +139,10 @@
         "uid": 44,
         "hotkey": "5EvosuiYGEf8xqDfHVyQcyPD1BjN1fDjyqLdhHMRMawPo42Y",
         "coldkey": "5C9y6fnLPSzBeh1Np7f4DnGen42xV29nL9qZTDuwpVC4iTEE",
-        "incentive": 0.008163576714732586,
-        "emission": 1.205197772,
-        "dailyMiningAlpha": 24.098878461,
-        "alphaStake": 17.757725337,
+        "incentive": 0.00584420538643473,
+        "emission": 0.864012451,
+        "dailyMiningAlpha": 17.2520943,
+        "alphaStake": 46.894091551,
         "validatorPermit": false,
         "isOwner": false,
         "isKubeTEE": true,
