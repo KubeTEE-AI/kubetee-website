@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-15T06:11:09.005Z",
+  "generatedAt": "2026-09-16T06:04:06.958Z",
   "coldkey": "5C9y6fnLPSzBeh1Np7f4DnGen42xV29nL9qZTDuwpVC4iTEE",
   "recycle": {
     "fills": [
@@ -159,15 +159,15 @@
         "uid": 44,
         "hotkey": "5EvosuiYGEf8xqDfHVyQcyPD1BjN1fDjyqLdhHMRMawPo42Y",
         "coldkey": "5C9y6fnLPSzBeh1Np7f4DnGen42xV29nL9qZTDuwpVC4iTEE",
-        "incentive": 0.016037232013427938,
-        "emission": 2.368523467,
-        "dailyMiningAlpha": 47.341908903,
-        "alphaStake": 10.145695719,
+        "incentive": 0.013244831006332494,
+        "emission": 1.955411631,
+        "dailyMiningAlpha": 39.09874113,
+        "alphaStake": 48.782062812,
         "validatorPermit": false,
         "isOwner": false,
         "isKubeTEE": true,
         "active": false,
-        "rank": 39,
+        "rank": 28,
         "registeredAtBlock": 8864149,
         "link": "https://taostats.io/neurons?netuid=28&uid=44"
       }
