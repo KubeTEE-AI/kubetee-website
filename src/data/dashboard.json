@@ -1,8 +1,18 @@
 {
-  "generatedAt": "2026-10-12T07:23:51.268Z",
+  "generatedAt": "2026-10-13T07:45:06.579Z",
   "coldkey": "5C9y6fnLPSzBeh1Np7f4DnGen42xV29nL9qZTDuwpVC4iTEE",
   "recycle": {
     "fills": [
+      {
+        "ts": "2026-10-13T00:00:36Z",
+        "block": 9270585,
+        "extrinsic": "9270585-0010",
+        "sn28Alpha": 61.124012122,
+        "sn90Alpha": 90.268253649,
+        "taoValue": 1.711933278,
+        "usdValue": 464.75,
+        "link": "https://www.tao.app/extrinsic/9270585-0010"
+      },
       {
         "ts": "2026-10-12T00:00:36Z",
         "block": 9263386,
@@ -275,11 +285,11 @@
       }
     ],
     "totals": {
-      "sn28Alpha": 3971.1620897420003,
-      "sn90Alpha": 2496.83559517,
-      "taoValue": 76.96656565999999,
-      "usdValue": 19892.76,
-      "count": 27
+      "sn28Alpha": 4032.2861018640006,
+      "sn90Alpha": 2587.1038488189997,
+      "taoValue": 78.67849893799999,
+      "usdValue": 20357.510000000002,
+      "count": 28
     }
   },
   "sn28": {
@@ -289,10 +299,10 @@
         "uid": 44,
         "hotkey": "5EvosuiYGEf8xqDfHVyQcyPD1BjN1fDjyqLdhHMRMawPo42Y",
         "coldkey": "5C9y6fnLPSzBeh1Np7f4DnGen42xV29nL9qZTDuwpVC4iTEE",
-        "incentive": 0.019729915312428473,
-        "emission": 2.914049887,
-        "dailyMiningAlpha": 58.242710002,
-        "alphaStake": 17.67186239,
+        "incentive": 0.025528343633173113,
+        "emission": 3.769167319,
+        "dailyMiningAlpha": 75.359670405,
+        "alphaStake": 21.309027518,
         "validatorPermit": false,
         "isOwner": false,
         "isKubeTEE": true,
