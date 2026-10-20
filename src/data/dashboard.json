@@ -1,8 +1,18 @@
 {
-  "generatedAt": "2026-10-19T06:14:50.916Z",
+  "generatedAt": "2026-10-20T06:03:41.099Z",
   "coldkey": "5C9y6fnLPSzBeh1Np7f4DnGen42xV29nL9qZTDuwpVC4iTEE",
   "recycle": {
     "fills": [
+      {
+        "ts": "2026-10-20T00:00:48Z",
+        "block": 9320986,
+        "extrinsic": "9320986-0015",
+        "sn28Alpha": 81.070904974,
+        "sn90Alpha": 125.566364286,
+        "taoValue": 2.689229083,
+        "usdValue": 720.32,
+        "link": "https://www.tao.app/extrinsic/9320986-0015"
+      },
       {
         "ts": "2026-10-19T00:00:48Z",
         "block": 9313786,
@@ -345,11 +355,11 @@
       }
     ],
     "totals": {
-      "sn28Alpha": 4617.881237138,
-      "sn90Alpha": 3495.534054453999,
-      "taoValue": 97.909163085,
-      "usdValue": 25622.760000000002,
-      "count": 34
+      "sn28Alpha": 4698.952142112,
+      "sn90Alpha": 3621.100418739999,
+      "taoValue": 100.598392168,
+      "usdValue": 26343.08,
+      "count": 35
     }
   },
   "sn28": {
@@ -359,15 +369,15 @@
         "uid": 44,
         "hotkey": "5EvosuiYGEf8xqDfHVyQcyPD1BjN1fDjyqLdhHMRMawPo42Y",
         "coldkey": "5C9y6fnLPSzBeh1Np7f4DnGen42xV29nL9qZTDuwpVC4iTEE",
-        "incentive": 0.03083848325322347,
-        "emission": 4.553093943,
-        "dailyMiningAlpha": 91.035202563,
-        "alphaStake": 24.146082867,
+        "incentive": 0.014435034714274816,
+        "emission": 2.131161871,
+        "dailyMiningAlpha": 42.612460362,
+        "alphaStake": 10.279198259,
         "validatorPermit": false,
         "isOwner": false,
         "isKubeTEE": true,
         "active": false,
-        "rank": 40,
+        "rank": 62,
         "registeredAtBlock": 8864149,
         "link": "https://taostats.io/neurons?netuid=28&uid=44"
       }
