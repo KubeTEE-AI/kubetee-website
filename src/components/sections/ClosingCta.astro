@@ -1,0 +1,35 @@
+---
+import ButtonLink from "../ui/ButtonLink.astro";
+import Container from "../ui/Container.astro";
+import SectionLabel from "../ui/SectionLabel.astro";
+import { closing } from "../../content/site";
+---
+
+<section aria-labelledby="closing-title" class="py-16 md:py-20">
+  <Container>
+    <div class="flex min-h-80 items-center md:min-h-95">
+      <div class="w-full">
+        <SectionLabel>Get started</SectionLabel>
+
+        <div class="mt-6 grid gap-10 lg:grid-cols-[3fr_2fr] lg:items-center lg:gap-20 xl:grid-cols-[7fr_3fr]">
+          <h2
+            id="closing-title"
+            class="max-w-[14ch] text-[clamp(2.75rem,6vw,5rem)] font-light leading-[0.98] tracking-[-0.035em] text-body lg:max-w-none"
+          >
+            {closing.title}
+          </h2>
+
+          <div>
+            <p class="max-w-[40ch] text-sm leading-6 text-muted">{closing.description}</p>
+            <div class="mt-6 flex flex-row gap-3">
+              <ButtonLink href={closing.primaryCta.href}>{closing.primaryCta.label}</ButtonLink>
+              <ButtonLink href={closing.secondaryCta.href} variant="secondary">
+                {closing.secondaryCta.label}
+              </ButtonLink>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Container>
+</section>

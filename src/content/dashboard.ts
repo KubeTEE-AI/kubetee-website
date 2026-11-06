@@ -1,0 +1,67 @@
+export const dashboard = {
+  meta: {
+    title: "Bittensor SN28 → SN90 Recycle Dashboard",
+    description:
+      "Every Bittensor SN28 → SN90 alpha recycle fill, linked to its extrinsic. USD values are market estimates from TaoStats, not audited fiat revenue.",
+  },
+  links: {
+    recycler:
+      "https://github.com/KubeTEE-AI/kubetee-subnet/blob/main/docs/SN28-SN90-ALPHA-RECYCLE.md",
+    rawJson: "/dashboard.json",
+    subnet: "https://taostats.io/subnets/28",
+  },
+  header: {
+    kicker: "SN28 → SN90 recycle",
+    title: "SN28 → SN90: recycled alpha, verifiable on-chain.",
+    intro:
+      "KubeTEE is Bittensor subnet 90 (SN90). It also operates a miner on SN28 (sayGM), where it sells spare inference capacity; SN28 is a demand channel for spare capacity, not SN90's product. Alpha earned there is swapped to SN90 alpha and recycled to unissued supply.",
+  },
+  metrics: {
+    primaryLabel: "Swap value · lifetime, USD est.",
+    sn90Label: "SN90 α recycled (lifetime)",
+    windowLabel: "Swap value · last 30 days",
+    fillsLabel: "Fills · lifetime",
+    priorLabel: "vs prior 30 days",
+    activeLabel: "active days",
+  },
+  chart: {
+    kicker: "30-day trend",
+    title: "Daily swap value",
+    subtitle: "USD market estimate · 30 UTC days ending",
+    totalLabel: "Total",
+    peakLabel: "Peak",
+    activeLabel: "Active days",
+    detailsLabel: "View daily values",
+    detailsCaption: "Daily swap value in USD for the 30 UTC days shown in the chart.",
+    empty: "No fills in this 30-day window.",
+    zeroNote: "A tick marks a UTC day without a fill. Bars are USD market estimates.",
+  },
+  table: {
+    kicker: "Swap ledger",
+    title: "Every fill, with its extrinsic.",
+    intro: "Newest first. Each row links to its extrinsic; totals are computed from these fills.",
+    date: "Date (UTC)",
+    sn28: "SN28 α",
+    sn90: "SN90 α",
+    tao: "TAO",
+    usd: "USD est.",
+    extrinsic: "Extrinsic",
+    note: "Each fill is a dTAO swap on the chain AMM followed by recycle_alpha on netuid 90; alpha returns to unissued supply. USD values are market estimates from TaoStats.",
+    recyclerLink: "How the recycler works",
+    rawJson: "Raw JSON",
+    mobileOlder: "earlier fills",
+    empty: "No fills have been recorded yet.",
+  },
+  operator: {
+    label: "Operator",
+    title: "KubeTEE's SN28 miner",
+    uid: "UID",
+    incentive: "Incentive",
+    dailyMining: "Daily mining α",
+    alphaStake: "α stake",
+    hotkey: "Hotkey",
+    note: "Tracks KubeTEE's miner only.",
+    link: "View on TaoStats",
+    unavailable: "Operator data is unavailable in this snapshot.",
+  },
+} as const;

@@ -4,60 +4,59 @@
 //   1. dTAO trades: our coldkey's SN28 -> SN90 swap fills (the daily recycle)
 //   2. Metagraph: all hotkeys registered on SN28
 //
-// Output: src/data/dashboard.json — committed to the repo so the static
-// build never needs the API at request time. Re-run via the dashboard-data
-// GitHub Action (cron + dispatch) to refresh.
+// Output: src/data/dashboard.json and public/dashboard.json — committed to the
+// repo so the static build never needs the API at request time. Re-run via the
+// dashboard-data GitHub Action (cron + dispatch) to refresh.
 
-import { writeFileSync, mkdirSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { writeFileSync, mkdirSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const OUT = join(__dirname, '..', 'src', 'data', 'dashboard.json');
+const OUT = join(__dirname, "..", "src", "data", "dashboard.json");
+const PUBLIC_OUT = join(__dirname, "..", "public", "dashboard.json");
 
-const API = 'https://api.taostats.io';
+const API = "https://api.taostats.io";
 const KEY = process.env.TAOSTATS_API_KEY;
-const DRY_RUN = process.argv.includes('--dry-run');
+const DRY_RUN = process.argv.includes("--dry-run");
 
 // --- Tunables (see docs/superpowers/specs/2026-09-05-dashboard-auto-update-design.md) ---
-const REQUEST_TIMEOUT_MS = 30_000;   // per-request timeout
-const MAX_ATTEMPTS = 3;              // per-request retry cap
-const BACKOFF_BASE_MS = 5_000;       // 5s -> 15s (with MAX_ATTEMPTS=3)
-const SETTLE_POLL_INTERVAL_MS = 15 * 60_000;  // 15 min between settle polls
-const SETTLE_WINDOW_MS = 2 * 60 * 60_000;     // 2h settle window
-const RECYCLE_RUN_SLACK_MS = 30 * 60_000;     // slack before today's 00:00 UTC
-const MIN_ORIGIN_TAO = 1.0;          // recycler's MIN_ORIGIN_TAO
-const METAGRAPH_SANITY_FLOOR = 100;  // hotkey count sanity floor (~250 today)
+const REQUEST_TIMEOUT_MS = 30_000; // per-request timeout
+const MAX_ATTEMPTS = 3; // per-request retry cap
+const BACKOFF_BASE_MS = 5_000; // 5s -> 15s (with MAX_ATTEMPTS=3)
+const SETTLE_POLL_INTERVAL_MS = 15 * 60_000; // 15 min between settle polls
+const SETTLE_WINDOW_MS = 2 * 60 * 60_000; // 2h settle window
+const RECYCLE_RUN_SLACK_MS = 30 * 60_000; // slack before today's 00:00 UTC
+const MIN_ORIGIN_TAO = 1.0; // recycler's MIN_ORIGIN_TAO
+const METAGRAPH_SANITY_FLOOR = 100; // hotkey count sanity floor (~250 today)
 
 if (!KEY) {
-  console.error('fetch-dashboard-data: TAOSTATS_API_KEY not set');
+  console.error("fetch-dashboard-data: TAOSTATS_API_KEY not set");
   process.exit(1);
 }
 
 // The KubeTEE owner coldkey — the account that swaps SN28 miner alpha
 // to SN90 and recycles it.
-const KUBETEE_COLDKEY = '5C9y6fnLPSzBeh1Np7f4DnGen42xV29nL9qZTDuwpVC4iTEE';
+const KUBETEE_COLDKEY = "5C9y6fnLPSzBeh1Np7f4DnGen42xV29nL9qZTDuwpVC4iTEE";
 // Our sayGM miner hotkey on SN28 (uid 44) — highlighted in the table.
-const KUBETEE_SN28_HOTKEY =
-  '5EvosuiYGEf8xqDfHVyQcyPD1BjN1fDjyqLdhHMRMawPo42Y';
+const KUBETEE_SN28_HOTKEY = "5EvosuiYGEf8xqDfHVyQcyPD1BjN1fDjyqLdhHMRMawPo42Y";
 
 // --- HTTP layer with retry (timeout, 429 Retry-After, 5xx backoff) ---
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function getOnce(path) {
   const res = await fetch(`${API}${path}`, {
-    headers: { Accept: 'application/json', Authorization: KEY },
+    headers: { Accept: "application/json", Authorization: KEY },
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   });
   if (!res.ok) {
-    const body = await res.text().catch(() => '');
+    const body = await res.text().catch(() => "");
     const err = new Error(`GET ${path} -> ${res.status} ${body}`);
     err.status = res.status;
-    const raRaw = res.headers.get('retry-after');
+    const raRaw = res.headers.get("retry-after");
     const raSeconds = raRaw != null ? Number(raRaw) : NaN;
-    err.retryAfterMs = Number.isFinite(raSeconds) && raSeconds > 0
-      ? Math.min(raSeconds * 1000, 60_000)
-      : null;
+    err.retryAfterMs =
+      Number.isFinite(raSeconds) && raSeconds > 0 ? Math.min(raSeconds * 1000, 60_000) : null;
     throw err;
   }
   const json = await res.json();
@@ -71,14 +70,14 @@ async function get(path) {
       return await getOnce(path);
     } catch (err) {
       lastErr = err;
-      const retriable = err.name === 'TimeoutError'
-        || err.name === 'AbortError'
-        || (err.status >= 500)
-        || (err.status === 429)
-        || (err instanceof TypeError); // fetch network errors: ECONNREFUSED/ECONNRESET/DNS — no .status
+      const retriable =
+        err.name === "TimeoutError" ||
+        err.name === "AbortError" ||
+        err.status >= 500 ||
+        err.status === 429 ||
+        err instanceof TypeError; // fetch network errors: ECONNREFUSED/ECONNRESET/DNS — no .status
       if (!retriable || attempt === MAX_ATTEMPTS) throw err;
-      const delay = err.retryAfterMs
-        ?? BACKOFF_BASE_MS * 3 ** (attempt - 1);
+      const delay = err.retryAfterMs ?? BACKOFF_BASE_MS * 3 ** (attempt - 1);
       console.warn(
         `fetch-dashboard-data: GET ${path} failed (${err.message}), ` +
           `retry ${attempt}/${MAX_ATTEMPTS - 1} in ${Math.round(delay / 1000)}s`,
@@ -95,7 +94,7 @@ async function getPaginated(path, maxPages = 5) {
   const all = [];
   let page = 1;
   while (page <= maxPages) {
-    const sep = path.includes('?') ? '&' : '?';
+    const sep = path.includes("?") ? "&" : "?";
     const { data, pagination } = await get(`${path}${sep}page=${page}`);
     all.push(...data);
     if (!pagination?.next_page) break;
@@ -150,7 +149,7 @@ async function fetchSn28PoolPrice() {
   // Taostats v1 API: /v1/subnets/pools; total_tao renamed tao_in_pool and
   // both fields are RAO decimal strings now, so the ratio keeps the 1e9
   // TAO conversion on both sides.
-  const { data } = await get('/v1/subnets/pools?netuid=28');
+  const { data } = await get("/v1/subnets/pools?netuid=28");
   const row = data?.[0];
   if (!row) return null;
   const price = Number(row.price);
@@ -159,7 +158,7 @@ async function fetchSn28PoolPrice() {
   const alpha = Number(row.alpha_in_pool);
   const tao = Number(row.tao_in_pool);
   if (Number.isFinite(alpha) && Number.isFinite(tao) && alpha > 0) {
-    return (tao / 1e9) / (alpha / 1e9);
+    return tao / 1e9 / (alpha / 1e9);
   }
   return null;
 }
@@ -168,7 +167,7 @@ async function fetchOurStake() {
   // Taostats v1 API: /v1/subnets/metagraph (order_by/order_dir replace the
   // old order=uid_asc; limit max 256 — one subnet fits in a single page).
   const { data } = await get(
-    '/v1/subnets/metagraph?netuid=28&order_by=uid&order_dir=asc&limit=50&page=1',
+    "/v1/subnets/metagraph?netuid=28&order_by=uid&order_dir=asc&limit=50&page=1",
   );
   const ours = data.find((n) => n.hotkey === KUBETEE_SN28_HOTKEY);
   if (!ours) return { found: false, stake: null };
@@ -182,7 +181,7 @@ async function evaluateSettle() {
 
   // S1 — today's fill is visible
   if (newestFill && Date.parse(newestFill.timestamp) >= cutoff) {
-    return { settled: true, reason: 'S1', fills, stakeInfo: null, price: null };
+    return { settled: true, reason: "S1", fills, stakeInfo: null, price: null };
   }
 
   // S2 — skip day: stake below the recycler's minimum
@@ -190,15 +189,15 @@ async function evaluateSettle() {
   let price = await fetchSn28PoolPrice();
   if (price == null && newestFill) price = sn28PriceFromFill(mapFill(newestFill));
   if (
-    stakeInfo.found
-    && Number.isFinite(stakeInfo.stake)
-    && Number.isFinite(price)
-    && stakeInfo.stake * price < MIN_ORIGIN_TAO
+    stakeInfo.found &&
+    Number.isFinite(stakeInfo.stake) &&
+    Number.isFinite(price) &&
+    stakeInfo.stake * price < MIN_ORIGIN_TAO
   ) {
-    return { settled: true, reason: 'S2', fills, stakeInfo, price };
+    return { settled: true, reason: "S2", fills, stakeInfo, price };
   }
 
-  return { settled: false, reason: 'unsettled', fills, stakeInfo, price };
+  return { settled: false, reason: "unsettled", fills, stakeInfo, price };
 }
 
 // --- Main flow ---
@@ -211,7 +210,7 @@ async function pollUntilSettled() {
     } catch (err) {
       if (Date.now() >= deadline) {
         console.error(
-          'fetch-dashboard-data: settle window expired with API errors — ' +
+          "fetch-dashboard-data: settle window expired with API errors — " +
             `last error: ${err.message}`,
         );
         process.exit(1);
@@ -225,16 +224,16 @@ async function pollUntilSettled() {
     }
     console.log(
       `settle-check: reason=${verdict.reason} ` +
-        `newest=${verdict.fills[0]?.timestamp ?? 'none'} ` +
-        `stake=${verdict.stakeInfo?.stake ?? 'n/a'} price=${verdict.price ?? 'n/a'}`,
+        `newest=${verdict.fills[0]?.timestamp ?? "none"} ` +
+        `stake=${verdict.stakeInfo?.stake ?? "n/a"} price=${verdict.price ?? "n/a"}`,
     );
     if (verdict.settled) return verdict;
     if (Date.now() >= deadline) {
       console.error(
         `fetch-dashboard-data: settle window (${SETTLE_WINDOW_MS / 60000}min) expired ` +
-          'without S1 (today\u2019s fill) or S2 (stake below recycler minimum). ' +
-          'Not publishing stale data. Investigate: TaoStats indexer lag, or the ' +
-          'alpha-recycler CronJob failed with \u22651 TAO unswapped.',
+          "without S1 (today\u2019s fill) or S2 (stake below recycler minimum). " +
+          "Not publishing stale data. Investigate: TaoStats indexer lag, or the " +
+          "alpha-recycler CronJob failed with \u22651 TAO unswapped.",
       );
       process.exit(1);
     }
@@ -247,7 +246,7 @@ const settled = await pollUntilSettled();
 // Full fills fetch (all pages) + full metagraph fetch (once, post-settle)
 const fullFills = await getFills();
 const neurons = await getPaginated(
-  '/v1/subnets/metagraph?netuid=28&order_by=uid&order_dir=asc&limit=50',
+  "/v1/subnets/metagraph?netuid=28&order_by=uid&order_dir=asc&limit=50",
 );
 const sn28 = neurons.map((n) => ({
   uid: n.uid,
@@ -284,14 +283,14 @@ const ourRow = sn28.find((n) => n.isKubeTEE);
 
 // --- Validation (atomic: nothing written unless all pass) ---
 if (!Array.isArray(recycle) || recycle.length === 0) {
-  console.error('fetch-dashboard-data: fills empty or not an array');
+  console.error("fetch-dashboard-data: fills empty or not an array");
   process.exit(1);
 }
 if (sn28.length < METAGRAPH_SANITY_FLOOR) {
   console.error(
     `fetch-dashboard-data: metagraph count ${sn28.length} < floor ${METAGRAPH_SANITY_FLOOR}`,
   );
-  console.error('Possible pagination breakage — not writing.');
+  console.error("Possible pagination breakage — not writing.");
   process.exit(1);
 }
 if (!sn28.some((n) => n.isKubeTEE)) {
@@ -301,21 +300,21 @@ if (!sn28.some((n) => n.isKubeTEE)) {
   process.exit(1);
 }
 if (
-  settled.reason === 'S2'
-  && !(Number.isFinite(settled.stakeInfo?.stake) && Number.isFinite(settled.price))
+  settled.reason === "S2" &&
+  !(Number.isFinite(settled.stakeInfo?.stake) && Number.isFinite(settled.price))
 ) {
-  console.error('fetch-dashboard-data: S2 settle with non-finite stake/price');
+  console.error("fetch-dashboard-data: S2 settle with non-finite stake/price");
   process.exit(1);
 }
 
 if (DRY_RUN) {
-  console.log('dry-run: settled, not writing. Verdict:', {
+  console.log("dry-run: settled, not writing. Verdict:", {
     reason: settled.reason,
-    newestFill: fullFills[0]?.timestamp ?? 'none',
+    newestFill: fullFills[0]?.timestamp ?? "none",
     fillCount: recycle.length,
     hotkeyCount: sn28.length,
-    stake: settled.stakeInfo?.stake ?? 'n/a',
-    price: settled.price ?? 'n/a',
+    stake: settled.stakeInfo?.stake ?? "n/a",
+    price: settled.price ?? "n/a",
   });
   process.exit(0);
 }
@@ -336,8 +335,11 @@ const payload = {
     hotkeys: ourRow ? [ourRow] : [],
   },
 };
-writeFileSync(OUT, JSON.stringify(payload, null, 2) + '\n');
+const serialized = JSON.stringify(payload, null, 2) + "\n";
+writeFileSync(OUT, serialized);
+mkdirSync(dirname(PUBLIC_OUT), { recursive: true });
+writeFileSync(PUBLIC_OUT, serialized);
 console.log(
   `fetch-dashboard-data: settled=${settled.reason} ${recycle.length} fills, ` +
-    `${sn28.length} SN28 hotkeys (${ourRow ? 'ours only published' : 'OURS MISSING'}) -> ${OUT}`,
+    `${sn28.length} SN28 hotkeys (${ourRow ? "ours only published" : "OURS MISSING"}) -> ${OUT} and ${PUBLIC_OUT}`,
 );

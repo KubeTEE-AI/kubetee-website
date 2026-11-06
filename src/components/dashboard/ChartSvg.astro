@@ -1,0 +1,181 @@
+---
+import { type DashboardSummary, formatDate, formatUsd, formatUsdAxis } from "../../lib/dashboard";
+
+interface Props {
+  summary: DashboardSummary;
+  compact?: boolean;
+  idPrefix: string;
+}
+
+const { summary, compact = false, idPrefix } = Astro.props;
+const { window } = summary;
+const series = window.series;
+
+const DESKTOP = {
+  width: 880,
+  height: 300,
+  left: 56,
+  right: 12,
+  top: 24,
+  bottom: 40,
+  labelSize: 10,
+};
+
+const COMPACT = {
+  width: 360,
+  height: 240,
+  left: 40,
+  right: 8,
+  top: 20,
+  bottom: 32,
+  labelSize: 9,
+};
+
+const GRID = "rgba(255,255,255,0.1)";
+const BASELINE_STROKE = "rgba(255,255,255,0.18)";
+const AXIS = "#8A94A2";
+const BODY = "#F2F4F7";
+
+function niceCeil(value: number): number {
+  if (!Number.isFinite(value) || value <= 0) return 1;
+  const exponent = Math.floor(Math.log10(value));
+  const base = 10 ** exponent;
+  const fraction = value / base;
+  const step = fraction <= 1 ? 1 : fraction <= 2 ? 2 : fraction <= 5 ? 5 : 10;
+  return step * base;
+}
+
+const geometry = compact ? COMPACT : DESKTOP;
+const plotWidth = geometry.width - geometry.left - geometry.right;
+const plotHeight = geometry.height - geometry.top - geometry.bottom;
+const baseline = geometry.top + plotHeight;
+
+const maxUsd = series.reduce((max, point) => Math.max(max, point.usd), 0);
+const yMax = niceCeil(maxUsd);
+const yTicks = [0, yMax / 2, yMax];
+const slot = plotWidth / series.length;
+const barWidth = Math.max(2, slot * 0.56);
+const peak = window.peak;
+const peakIndex = peak ? series.findIndex((point) => point.date === peak.date) : -1;
+const xTickIndexes = compact
+  ? [0, series.length - 1]
+  : [0, Math.floor((series.length - 1) / 2), series.length - 1];
+
+const description = [
+  `Bar chart of daily swap value in USD for the 30 UTC days ending ${formatDate(window.end)}.`,
+  `Total ${formatUsd(window.totalUsd)}.`,
+  peak ? `Peak ${formatUsd(peak.usd)} on ${peak.label}.` : "",
+  `Fills on ${window.activeDays} of ${window.days} days.`,
+  summary.totals.usdMissing > 0 ? "Some fills have no reported USD value." : "",
+]
+  .filter(Boolean)
+  .join(" ");
+
+let peakLabel: { x: number; y: number; anchor: string; text: string } | null = null;
+if (peak && peakIndex >= 0) {
+  const center = geometry.left + peakIndex * slot + slot / 2;
+  const height = Math.max(2, (peak.usd / yMax) * plotHeight);
+  const barTop = baseline - height;
+  const labelY = barTop - 8 < geometry.top + 10 ? barTop + 14 : barTop - 8;
+  const anchor =
+    center < geometry.left + 40
+      ? "start"
+      : center > geometry.width - geometry.right - 40
+        ? "end"
+        : "middle";
+  peakLabel = { x: center, y: labelY, anchor, text: formatUsd(peak.usd) };
+}
+---
+
+<svg
+  viewBox={`0 0 ${geometry.width} ${geometry.height}`}
+  role="img"
+  aria-labelledby={`${idPrefix}-chart-title ${idPrefix}-chart-desc`}
+  class="h-auto w-full"
+>
+  <title id={`${idPrefix}-chart-title`}>
+    {`Daily swap value, 30 UTC days ending ${formatDate(window.end)}`}
+  </title>
+  <desc id={`${idPrefix}-chart-desc`}>{description}</desc>
+
+  {yTicks.map((tick) => {
+    const y = baseline - (tick / yMax) * plotHeight;
+    return (
+      <g>
+        <line
+          x1={geometry.left}
+          y1={y}
+          x2={geometry.width - geometry.right}
+          y2={y}
+          stroke={tick === 0 ? BASELINE_STROKE : GRID}
+          stroke-width="1"
+        />
+        <text
+          x={geometry.left - 6}
+          y={y + 3}
+          fill={AXIS}
+          font-family="var(--font-mono)"
+          font-size={geometry.labelSize}
+          text-anchor="end"
+        >
+          {formatUsdAxis(tick)}
+        </text>
+      </g>
+    );
+  })}
+
+  {series.map((point, index) => {
+    const center = geometry.left + index * slot + slot / 2;
+    const x = center - barWidth / 2;
+    const height = point.usd > 0 ? Math.max(2, (point.usd / yMax) * plotHeight) : 0;
+    const y = baseline - height;
+    const latest = index === series.length - 1;
+    const title = `${formatDate(`${point.date}T00:00:00Z`)} · ${
+      point.fills > 0 ? formatUsd(point.usd) : "No fill"
+    }${point.fills > 0 ? ` · ${point.fills} fill${point.fills === 1 ? "" : "s"}` : ""}`;
+    return (
+      <g>
+        {point.usd > 0 ? (
+          <rect x={x} y={y} width={barWidth} height={height} fill={latest ? "#6DAA65" : "#83BB7B"}>
+            <title>{title}</title>
+          </rect>
+        ) : (
+          <rect x={x} y={baseline - 1} width={barWidth} height="1" fill="rgba(255,255,255,0.12)">
+            <title>{title}</title>
+          </rect>
+        )}
+      </g>
+    );
+  })}
+
+  {peakLabel && (
+    <text
+      x={peakLabel.x}
+      y={peakLabel.y}
+      fill={BODY}
+      font-family="var(--font-mono)"
+      font-size={geometry.labelSize}
+      text-anchor={peakLabel.anchor}
+    >
+      {peakLabel.text}
+    </text>
+  )}
+
+  {xTickIndexes.map((index) => {
+    const point = series[index];
+    const center = geometry.left + index * slot + slot / 2;
+    const anchor = index === 0 ? "start" : index === series.length - 1 ? "end" : "middle";
+    return (
+      <text
+        x={center}
+        y={baseline + 22}
+        fill={AXIS}
+        font-family="var(--font-mono)"
+        font-size={geometry.labelSize}
+        text-anchor={anchor}
+      >
+        {point.label}
+      </text>
+    );
+  })}
+</svg>

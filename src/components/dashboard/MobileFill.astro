@@ -1,0 +1,29 @@
+---
+import { type Fill, formatAlpha, formatDate, formatTao } from "../../lib/dashboard";
+import ExtrinsicLink from "./ExtrinsicLink.astro";
+import UsdValue from "./UsdValue.astro";
+
+interface Props {
+  fill: Fill;
+}
+
+const { fill } = Astro.props;
+---
+
+<li class="border-b border-line py-3">
+  <div class="flex items-baseline justify-between gap-4">
+    <time datetime={fill.ts} class="text-sm text-muted">
+      {formatDate(fill.ts)}
+    </time>
+    <span class="font-mono text-sm tabular-nums text-body">
+      <UsdValue value={fill.usdValue} />
+    </span>
+  </div>
+  <p class="mt-1 font-mono text-[11px] tabular-nums text-muted">
+    {formatAlpha(fill.sn28Alpha)} SN28 α → {formatAlpha(fill.sn90Alpha)} SN90 α ·
+    {formatTao(fill.taoValue)} TAO
+  </p>
+  <div class="mt-1">
+    <ExtrinsicLink fill={fill} />
+  </div>
+</li>

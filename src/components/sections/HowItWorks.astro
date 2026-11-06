@@ -1,0 +1,207 @@
+---
+import Container from "../ui/Container.astro";
+import SectionLabel from "../ui/SectionLabel.astro";
+import { howItWorks } from "../../content/site";
+
+const boxes = [
+  { x: 10, title: "GPU cluster", line1: "RKE2 · Fleet", line2: "GPU Operator" },
+  {
+    x: 255,
+    title: "Confidential guest",
+    line1: "Kata 4.2.0 + CoCo",
+    line2: "TDX / SEV-SNP",
+  },
+  {
+    x: 500,
+    title: "Remote attestation",
+    line1: "CoCo Trustee / KBS",
+    line2: "nonce-bound quote",
+  },
+  { x: 745, title: "Gateway", line1: "LiteLLM", line2: "OpenAI-compatible" },
+  { x: 990, title: "Your workload", line1: "inference", line2: "standard API" },
+];
+---
+
+<section id="how" aria-labelledby="how-title" class="border-b border-line py-20 md:py-28">
+  <Container>
+    <SectionLabel number="03">{howItWorks.kicker}</SectionLabel>
+    <h2
+      id="how-title"
+      class="mt-6 w-full text-[clamp(2.5rem,5vw,4.5rem)] font-light leading-[1.02] tracking-[-0.03em] text-body lg:w-1/2"
+    >
+      {howItWorks.title}
+    </h2>
+    <p class="mt-4 max-w-[60ch] text-sm leading-6 text-muted lg:max-w-[55ch]">{howItWorks.intro}</p>
+
+    <div class="mt-12 hidden border border-line bg-stage-deep p-4 md:block md:p-6">
+      <div data-architecture-motion>
+        <svg
+          viewBox="0 0 1200 230"
+          role="img"
+          aria-labelledby="pipeline-title pipeline-desc"
+          class="h-auto w-full"
+        >
+          <title id="pipeline-title">KubeTEE confidential inference path</title>
+          <desc id="pipeline-desc">
+            A GPU cluster running RKE2 and Rancher Fleet feeds a Kata and Confidential Containers
+            guest on Intel TDX or AMD SEV-SNP. Remote attestation through CoCo Trustee and KBS
+            releases secrets only to the attested guest. The LiteLLM gateway serves your workload
+            through an OpenAI-compatible API.
+          </desc>
+
+          <defs>
+            <marker
+              id="pipeline-arrow"
+              viewBox="0 0 8 8"
+              refX="7"
+              refY="4"
+              markerWidth="6"
+              markerHeight="6"
+              orient="auto-start-reverse"
+            >
+              <path d="M0 0L8 4L0 8Z" fill="#83BB7B"></path>
+            </marker>
+          </defs>
+
+          <text
+            x="10"
+            y="30"
+            fill="#83BB7B"
+            font-family="var(--font-mono)"
+            font-size="10"
+            letter-spacing="0.14em"
+          >
+            LIVE CONFIDENTIAL PATH
+          </text>
+
+          {boxes.map((box, index) => (
+            <g data-node>
+              <rect
+                x={box.x}
+                y="60"
+                width="200"
+                height="130"
+                fill="#151A1F"
+                stroke="rgba(255,255,255,0.14)"
+              />
+              <circle cx={box.x + 16} cy="84" r="4" fill="#83BB7B" />
+              <text
+                x={box.x + 28}
+                y="89"
+                fill="#F2F4F7"
+                font-family="var(--font-sans)"
+                font-size="16"
+                font-weight="500"
+              >
+                {box.title}
+              </text>
+              <text
+                x={box.x + 16}
+                y="124"
+                fill="#9AA4B2"
+                font-family="var(--font-mono)"
+                font-size="11"
+              >
+                {box.line1}
+              </text>
+              <text
+                x={box.x + 16}
+                y="142"
+                fill="#9AA4B2"
+                font-family="var(--font-mono)"
+                font-size="11"
+              >
+                {box.line2}
+              </text>
+              {index < boxes.length - 1 && (
+                <path
+                  data-draw
+                  d={`M${box.x + 210} 125H${box.x + 245}`}
+                  fill="none"
+                  stroke="#83BB7B"
+                  stroke-width="1.5"
+                  marker-end="url(#pipeline-arrow)"
+                  vector-effect="non-scaling-stroke"
+                />
+              )}
+            </g>
+          ))}
+        </svg>
+      </div>
+    </div>
+
+    <ol class="mt-10 border-t border-line md:hidden">
+      {howItWorks.stages.map((stage, index) => (
+        <li class="border-b border-line py-5">
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-medium tabular-nums text-brand">
+              {String(index + 1).padStart(2, "0")}
+            </span>
+            <h3 class="text-lg text-body">{stage.title}</h3>
+          </div>
+          <p class="mt-2 text-sm leading-6 text-muted">{stage.body}</p>
+        </li>
+      ))}
+    </ol>
+
+    <div class="mt-10 flex flex-col gap-4 border-t border-line pt-6 md:flex-row md:items-center md:justify-end">
+      <a
+        href={howItWorks.attestation.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-sm font-medium text-brand transition-colors hover:text-brand-strong"
+      >
+        {howItWorks.attestation.linkLabel} <span aria-hidden="true">→</span>
+      </a>
+    </div>
+  </Container>
+</section>
+
+<script>
+  import { animate, createDrawable, stagger } from "animejs";
+
+  const node = document.querySelector("[data-architecture-motion]");
+
+  if (
+    node &&
+    !window.matchMedia("(prefers-reduced-motion: reduce)").matches &&
+    !window.matchMedia("(max-width: 767px)").matches
+  ) {
+    const run = () => {
+      const paths = Array.from(node.querySelectorAll("[data-draw]"));
+      const nodes = Array.from(node.querySelectorAll("[data-node]"));
+
+      if (paths.length > 0) {
+        const drawables = paths.flatMap((path) => createDrawable(path));
+        animate(drawables, {
+          draw: ["0 0", "0 1"],
+          duration: 1200,
+          delay: stagger(80),
+          ease: "inOutQuad",
+        });
+      }
+
+      if (nodes.length > 0) {
+        animate(nodes, {
+          opacity: [0.65, 1],
+          y: [8, 0],
+          duration: 500,
+          delay: stagger(80),
+          ease: "outQuad",
+        });
+      }
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          observer.disconnect();
+          run();
+        }
+      },
+      { threshold: 0.2 },
+    );
+
+    observer.observe(node);
+  }
+</script>

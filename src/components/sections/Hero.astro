@@ -1,0 +1,159 @@
+---
+import ButtonLink from "../ui/ButtonLink.astro";
+import Container from "../ui/Container.astro";
+import SealedCube from "../visuals/SealedCube.astro";
+import { hero } from "../../content/site";
+---
+
+<section
+  id="hero"
+  aria-labelledby="hero-title"
+  class="border-b border-line pb-14 pt-8 md:pb-28 md:pt-24"
+>
+  <Container>
+    <div data-hero-motion>
+      <div class="grid items-center gap-6 lg:grid-cols-12 lg:gap-8">
+        <div class="lg:col-span-7 lg:col-start-1 lg:row-start-1">
+          <p data-motion="eyebrow" class="text-xs font-medium uppercase tracking-widest text-muted">
+            {hero.eyebrow}
+          </p>
+
+          <h1
+            id="hero-title"
+            aria-label="The Confidential AI Factory on Bittensor"
+            class="mt-4 text-[clamp(2.5rem,7vw,6.5rem)] font-light leading-[0.95] tracking-[-0.04em] text-body md:mt-6 xl:text-[clamp(2.5rem,6.2vw,6.5rem)]"
+          >
+            {hero.titleLines.map((line, index) => (
+              <span aria-hidden="true" class="block overflow-hidden">
+                <span class:list={["block", line.accent && "text-brand"]}>
+                  {line.text}
+                  {index < hero.titleLines.length - 1 ? " " : null}
+                </span>
+              </span>
+            ))}
+          </h1>
+        </div>
+
+        <figure
+          data-motion="figure"
+          class="lg:col-span-5 lg:col-start-8 lg:row-span-2 lg:row-start-1"
+        >
+          <div class="mx-auto max-w-130 lg:ml-auto">
+            <SealedCube title={hero.cube.title} description={hero.cube.description} />
+          </div>
+          <figcaption class="mx-auto mt-4 max-w-[60ch] text-center font-mono text-[11px] uppercase tracking-[0.12em] text-faint md:mt-6">
+            {hero.cube.caption}
+          </figcaption>
+        </figure>
+
+        <div class="lg:col-span-7 lg:col-start-1 lg:row-start-2">
+          <p class="max-w-[58ch] text-sm leading-7 text-muted md:text-lg">{hero.description}</p>
+
+          <div data-motion="ctas" class="mt-6 flex flex-wrap items-center gap-3 md:mt-10">
+            <ButtonLink href={hero.primaryCta.href}>{hero.primaryCta.label}</ButtonLink>
+            <ButtonLink href={hero.secondaryCta.href} variant="secondary">
+              {hero.secondaryCta.label}
+            </ButtonLink>
+          </div>
+
+          <p class="mt-6 font-mono text-[11px] uppercase tracking-[0.12em] text-faint md:mt-8">
+            {hero.specLine}
+          </p>
+        </div>
+      </div>
+    </div>
+  </Container>
+</section>
+
+<script>
+  import { createDrawable, createTimeline, stagger } from "animejs";
+
+  const node = document.querySelector("[data-hero-motion]");
+
+  if (node && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    const eyebrow = node.querySelector('[data-motion="eyebrow"]');
+    const ctas = node.querySelector('[data-motion="ctas"]');
+    const figure = node.querySelector('[data-motion="figure"]');
+
+    const hostPaths = Array.from(node.querySelectorAll('[data-cube="host"]'));
+    const requestPaths = Array.from(node.querySelectorAll('[data-cube="request"]'));
+    const guest = node.querySelector('[data-cube="guest"]');
+    const tetherPaths = Array.from(node.querySelectorAll('[data-cube="tether"]'));
+    const key = node.querySelector('[data-cube="key"]');
+    const responsePaths = Array.from(node.querySelectorAll('[data-cube="response"]'));
+    const labels = Array.from(node.querySelectorAll('[data-cube="label"]'));
+
+    const timeline = createTimeline({ defaults: { ease: "outExpo" } });
+
+    if (eyebrow) {
+      timeline.add(eyebrow, { opacity: [0, 1], y: [8, 0], duration: 400, ease: "outQuad" }, 0);
+    }
+
+    if (ctas) {
+      timeline.add(ctas, { opacity: [0, 1], y: [12, 0], duration: 450 }, 350);
+    }
+
+    if (figure) {
+      timeline.add(figure, { opacity: [0, 1], y: [20, 0], duration: 600 }, 300);
+    }
+
+    if (hostPaths.length > 0) {
+      const drawables = hostPaths.flatMap((path) => createDrawable(path));
+      timeline.add(
+        drawables,
+        {
+          draw: ["0 0", "0 1"],
+          duration: 400,
+          delay: stagger(60),
+          ease: "inOutQuad",
+        },
+        350,
+      );
+    }
+
+    if (requestPaths.length > 0) {
+      const drawables = requestPaths.flatMap((path) => createDrawable(path));
+      timeline.add(drawables, { draw: ["0 0", "0 1"], duration: 350, ease: "inOutQuad" }, 500);
+    }
+
+    if (guest) {
+      timeline.add(
+        guest,
+        {
+          opacity: [0.35, 1],
+          scale: [0.96, 1],
+          transformOrigin: "280px 335px",
+          duration: 400,
+        },
+        650,
+      );
+    }
+
+    if (tetherPaths.length > 0) {
+      const drawables = tetherPaths.flatMap((path) => createDrawable(path));
+      timeline.add(drawables, { draw: ["0 0", "0 1"], duration: 300, ease: "inOutQuad" }, 900);
+    }
+
+    if (key) {
+      timeline.add(
+        key,
+        {
+          opacity: [0.4, 1],
+          scale: [0.92, 1],
+          transformOrigin: "280px 80px",
+          duration: 300,
+        },
+        1150,
+      );
+    }
+
+    if (responsePaths.length > 0) {
+      const drawables = responsePaths.flatMap((path) => createDrawable(path));
+      timeline.add(drawables, { draw: ["0 0", "0 1"], duration: 300, ease: "inOutQuad" }, 1350);
+    }
+
+    if (labels.length > 0) {
+      timeline.add(labels, { opacity: [0, 1], duration: 250, delay: stagger(60) }, 1500);
+    }
+  }
+</script>

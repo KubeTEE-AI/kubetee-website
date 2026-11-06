@@ -1,0 +1,195 @@
+@import "tailwindcss";
+
+@theme {
+  --color-stage: #27282a;
+  --color-stage-deep: #1e1f21;
+  --color-body: #f2f4f7;
+  --color-muted: #9aa4b2;
+  --color-faint: #8a94a2;
+  --color-brand: #83bb7b;
+  --color-brand-strong: #6daa65;
+  --color-warning: #ffb000;
+  --color-line: rgba(255, 255, 255, 0.1);
+
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    scroll-padding-top: 6rem;
+  }
+
+  body {
+    background-color: var(--color-stage);
+    color: var(--color-body);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: var(--color-brand);
+    color: var(--color-stage);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  dialog::backdrop {
+    background: transparent;
+  }
+}
+
+@layer components {
+  .container-editorial {
+    width: 100%;
+    max-width: 1440px;
+    margin-inline: auto;
+    padding-inline: 1.25rem;
+  }
+
+  @media (min-width: 768px) {
+    .container-editorial {
+      padding-inline: 2rem;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .container-editorial {
+      max-width: min(1440px, calc(80vw + 4rem));
+    }
+  }
+
+  .site-header {
+    background-color: var(--color-stage);
+    transition: background-color 180ms ease;
+  }
+
+  html[data-scrolled] .site-header {
+    background-color: rgba(39, 40, 42, 0.78);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
+
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    html[data-scrolled] .site-header {
+      background-color: rgba(39, 40, 42, 0.94);
+    }
+  }
+
+  html[data-menu-open] .site-header {
+    background-color: var(--color-stage);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-header {
+      transition: none;
+    }
+  }
+
+  .label-mono {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    line-height: 1.4;
+    text-transform: uppercase;
+  }
+
+  .skip-link {
+    position: absolute;
+    left: 1rem;
+    top: 1rem;
+    z-index: 100;
+    transform: translateY(-200%);
+    background-color: var(--color-brand);
+    color: var(--color-stage);
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+  }
+
+  .skip-link:focus {
+    transform: translateY(0);
+  }
+
+  .asset-card {
+    background-color: var(--color-stage-deep);
+    transition: background-color 180ms ease;
+  }
+
+  .asset-card:hover {
+    background-color: #17191a;
+  }
+
+  .asset-main {
+    transition: transform 180ms ease;
+  }
+
+  .asset-card:hover .asset-main {
+    transform: translateY(-6px);
+  }
+
+  .asset-extra {
+    opacity: 0;
+    transform: translateY(4px);
+    transition:
+      opacity 180ms ease,
+      transform 180ms ease;
+  }
+
+  .asset-card:hover .asset-extra {
+    opacity: 1;
+    transform: none;
+  }
+
+  @media (max-width: 1023px) {
+    .asset-extra {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .asset-main,
+    .asset-extra {
+      transition: none;
+    }
+
+    .asset-card:hover .asset-main {
+      transform: none;
+    }
+  }
+
+  .menu-dialog {
+    position: fixed;
+    inset: 0;
+    margin: 0;
+    width: 100%;
+    max-width: none;
+    height: 100dvh;
+    max-height: none;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background-color: var(--color-stage);
+    padding: 1.25rem;
+    padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+  }
+}

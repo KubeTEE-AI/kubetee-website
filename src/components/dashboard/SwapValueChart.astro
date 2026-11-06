@@ -1,0 +1,53 @@
+---
+import { dashboard } from "../../content/dashboard";
+import { type DashboardSummary, formatUsd, formatUsdExact } from "../../lib/dashboard";
+import ChartSvg from "./ChartSvg.astro";
+import DailyValues from "./DailyValues.astro";
+
+interface Props {
+  summary: DashboardSummary;
+}
+
+const { summary } = Astro.props;
+const { window } = summary;
+const series = window.series;
+const peak = window.peak;
+---
+
+{series.length === 0 ? (
+  <div class="mt-6 border border-line p-6 text-sm text-muted">{dashboard.chart.empty}</div>
+) : (
+  <figure class="mt-6">
+    <figcaption class="flex flex-wrap items-baseline gap-x-6 gap-y-2 border-b border-line pb-4 text-xs text-muted">
+      <span>
+        {dashboard.chart.totalLabel}{" "}
+        <span title={formatUsdExact(window.totalUsd)} class="font-mono text-body tabular-nums">
+          {formatUsd(window.totalUsd)}
+        </span>
+      </span>
+      {peak ? (
+        <span>
+          {dashboard.chart.peakLabel}{" "}
+          <span class="font-mono text-body tabular-nums">{formatUsd(peak.usd)}</span>{" "}
+          <span class="text-faint">· {peak.label}</span>
+        </span>
+      ) : null}
+      <span>
+        {dashboard.chart.activeLabel}{" "}
+        <span class="font-mono text-body tabular-nums">{window.activeDays}</span>{" "}
+        <span class="text-faint">of {window.days}</span>
+      </span>
+    </figcaption>
+
+    <div class="mt-4 hidden md:block">
+      <ChartSvg summary={summary} compact={false} idPrefix="desktop" />
+    </div>
+    <div class="mt-4 md:hidden">
+      <ChartSvg summary={summary} compact idPrefix="mobile" />
+    </div>
+
+    <p class="mt-3 text-xs leading-5 text-faint">{dashboard.chart.zeroNote}</p>
+
+    <DailyValues series={series} />
+  </figure>
+)}

@@ -1,0 +1,555 @@
+{
+  "generatedAt": "2026-11-05T07:55:50.188Z",
+  "coldkey": "5C9y6fnLPSzBeh1Np7f4DnGen42xV29nL9qZTDuwpVC4iTEE",
+  "recycle": {
+    "fills": [
+      {
+        "ts": "2026-11-05T00:00:36.000Z",
+        "block": 9436095,
+        "extrinsic": "9436095-0011",
+        "sn28Alpha": 53.567326881,
+        "sn90Alpha": 96.841130734,
+        "taoValue": 1.555525428,
+        "usdValue": 364.19,
+        "link": "https://www.tao.app/extrinsic/9436095-0011"
+      },
+      {
+        "ts": "2026-11-04T00:00:48.000Z",
+        "block": 9428898,
+        "extrinsic": "9428898-0018",
+        "sn28Alpha": 55.105881876,
+        "sn90Alpha": 102.327373032,
+        "taoValue": 1.666719226,
+        "usdValue": 376.91,
+        "link": "https://www.tao.app/extrinsic/9428898-0018"
+      },
+      {
+        "ts": "2026-11-03T00:00:36.000Z",
+        "block": 9421698,
+        "extrinsic": "9421698-0015",
+        "sn28Alpha": 54.515656151,
+        "sn90Alpha": 98.205267781,
+        "taoValue": 1.672045488,
+        "usdValue": 372.88,
+        "link": "https://www.tao.app/extrinsic/9421698-0015"
+      },
+      {
+        "ts": "2026-11-02T00:00:36.000Z",
+        "block": 9414504,
+        "extrinsic": "9414504-0019",
+        "sn28Alpha": 48.122310777,
+        "sn90Alpha": 93.606651106,
+        "taoValue": 1.517298394,
+        "usdValue": 354.46,
+        "link": "https://www.tao.app/extrinsic/9414504-0019"
+      },
+      {
+        "ts": "2026-11-01T00:00:36.000Z",
+        "block": 9407304,
+        "extrinsic": "9407304-0015",
+        "sn28Alpha": 57.650105163,
+        "sn90Alpha": 107.685537517,
+        "taoValue": 1.775741232,
+        "usdValue": 420.49,
+        "link": "https://www.tao.app/extrinsic/9407304-0015"
+      },
+      {
+        "ts": "2026-10-31T00:00:36.000Z",
+        "block": 9400104,
+        "extrinsic": "9400104-0021",
+        "sn28Alpha": 42.796070835,
+        "sn90Alpha": 86.945168943,
+        "taoValue": 1.448527813,
+        "usdValue": 345.98,
+        "link": "https://www.tao.app/extrinsic/9400104-0021"
+      },
+      {
+        "ts": "2026-10-30T00:00:36.001Z",
+        "block": 9392904,
+        "extrinsic": "9392904-0016",
+        "sn28Alpha": 34.320580927,
+        "sn90Alpha": 68.607860367,
+        "taoValue": 1.137799346,
+        "usdValue": 265.83,
+        "link": "https://www.tao.app/extrinsic/9392904-0016"
+      },
+      {
+        "ts": "2026-10-29T00:00:36.000Z",
+        "block": 9385704,
+        "extrinsic": "9385704-0014",
+        "sn28Alpha": 42.633162046,
+        "sn90Alpha": 81.935682509,
+        "taoValue": 1.391968665,
+        "usdValue": 357.87,
+        "link": "https://www.tao.app/extrinsic/9385704-0014"
+      },
+      {
+        "ts": "2026-10-28T00:05:48.000Z",
+        "block": 9378530,
+        "extrinsic": "9378530-0014",
+        "sn28Alpha": 51.398956562,
+        "sn90Alpha": 97.676977756,
+        "taoValue": 1.741917564,
+        "usdValue": 445.34,
+        "link": "https://www.tao.app/extrinsic/9378530-0014"
+      },
+      {
+        "ts": "2026-10-27T00:00:36.000Z",
+        "block": 9371304,
+        "extrinsic": "9371304-0010",
+        "sn28Alpha": 52.468490548,
+        "sn90Alpha": 91.479161094,
+        "taoValue": 1.668762512,
+        "usdValue": 418.59,
+        "link": "https://www.tao.app/extrinsic/9371304-0010"
+      },
+      {
+        "ts": "2026-10-26T00:00:36.000Z",
+        "block": 9364104,
+        "extrinsic": "9364104-0012",
+        "sn28Alpha": 48.037949382,
+        "sn90Alpha": 84.653478931,
+        "taoValue": 1.521541659,
+        "usdValue": 383.89,
+        "link": "https://www.tao.app/extrinsic/9364104-0012"
+      },
+      {
+        "ts": "2026-10-25T00:00:36.000Z",
+        "block": 9356904,
+        "extrinsic": "9356904-0009",
+        "sn28Alpha": 48.310033997,
+        "sn90Alpha": 79.210822687,
+        "taoValue": 1.404334454,
+        "usdValue": 352.45,
+        "link": "https://www.tao.app/extrinsic/9356904-0009"
+      },
+      {
+        "ts": "2026-10-24T00:00:48.000Z",
+        "block": 9349705,
+        "extrinsic": "9349705-0014",
+        "sn28Alpha": 34.296129704,
+        "sn90Alpha": 57.631743815,
+        "taoValue": 1.013785017,
+        "usdValue": 258.43,
+        "link": "https://www.tao.app/extrinsic/9349705-0014"
+      },
+      {
+        "ts": "2026-10-23T00:00:48.001Z",
+        "block": 9342505,
+        "extrinsic": "9342505-0010",
+        "sn28Alpha": 50.328265924,
+        "sn90Alpha": 84.547252928,
+        "taoValue": 1.515412627,
+        "usdValue": 389.85,
+        "link": "https://www.tao.app/extrinsic/9342505-0010"
+      },
+      {
+        "ts": "2026-10-22T00:00:36.000Z",
+        "block": 9335304,
+        "extrinsic": "9335304-0034",
+        "sn28Alpha": 42.633698256,
+        "sn90Alpha": 74.73148847,
+        "taoValue": 1.422602414,
+        "usdValue": 386.16,
+        "link": "https://www.tao.app/extrinsic/9335304-0034"
+      },
+      {
+        "ts": "2026-10-21T00:00:48.000Z",
+        "block": 9328178,
+        "extrinsic": "9328178-0019",
+        "sn28Alpha": 43.33766503,
+        "sn90Alpha": 72.058876366,
+        "taoValue": 1.501411646,
+        "usdValue": 410.85,
+        "link": "https://www.tao.app/extrinsic/9328178-0019"
+      },
+      {
+        "ts": "2026-10-20T00:00:48.000Z",
+        "block": 9320986,
+        "extrinsic": "9320986-0015",
+        "sn28Alpha": 81.070904974,
+        "sn90Alpha": 125.566364286,
+        "taoValue": 2.687801405,
+        "usdValue": 719.94,
+        "link": "https://www.tao.app/extrinsic/9320986-0015"
+      },
+      {
+        "ts": "2026-10-19T00:00:48.000Z",
+        "block": 9313786,
+        "extrinsic": "9313786-0015",
+        "sn28Alpha": 85.543804562,
+        "sn90Alpha": 144.547826557,
+        "taoValue": 2.937220687,
+        "usdValue": 794.39,
+        "link": "https://www.tao.app/extrinsic/9313786-0015"
+      },
+      {
+        "ts": "2026-10-18T00:00:48.000Z",
+        "block": 9306586,
+        "extrinsic": "9306586-0015",
+        "sn28Alpha": 90.259607704,
+        "sn90Alpha": 147.703186884,
+        "taoValue": 3.109736638,
+        "usdValue": 836.98,
+        "link": "https://www.tao.app/extrinsic/9306586-0015"
+      },
+      {
+        "ts": "2026-10-17T00:00:48.000Z",
+        "block": 9299386,
+        "extrinsic": "9299386-0016",
+        "sn28Alpha": 122.105817581,
+        "sn90Alpha": 191.326994094,
+        "taoValue": 4.066974183,
+        "usdValue": 1121.21,
+        "link": "https://www.tao.app/extrinsic/9299386-0016"
+      },
+      {
+        "ts": "2026-10-16T00:00:36.000Z",
+        "block": 9292185,
+        "extrinsic": "9292185-0011",
+        "sn28Alpha": 123.584790828,
+        "sn90Alpha": 185.89614805,
+        "taoValue": 3.940508211,
+        "usdValue": 1098.2,
+        "link": "https://www.tao.app/extrinsic/9292185-0011"
+      },
+      {
+        "ts": "2026-10-15T00:00:36.000Z",
+        "block": 9284985,
+        "extrinsic": "9284985-0035",
+        "sn28Alpha": 93.225026829,
+        "sn90Alpha": 139.188380851,
+        "taoValue": 3.057064781,
+        "usdValue": 826.11,
+        "link": "https://www.tao.app/extrinsic/9284985-0035"
+      },
+      {
+        "ts": "2026-10-14T00:00:36.000Z",
+        "block": 9277785,
+        "extrinsic": "9277785-0120",
+        "sn28Alpha": 70.87608777,
+        "sn90Alpha": 99.767669199,
+        "taoValue": 2.164081514,
+        "usdValue": 600.64,
+        "link": "https://www.tao.app/extrinsic/9277785-0120"
+      },
+      {
+        "ts": "2026-10-13T00:00:36.000Z",
+        "block": 9270585,
+        "extrinsic": "9270585-0010",
+        "sn28Alpha": 61.124012122,
+        "sn90Alpha": 90.268253649,
+        "taoValue": 1.711233338,
+        "usdValue": 464.56,
+        "link": "https://www.tao.app/extrinsic/9270585-0010"
+      },
+      {
+        "ts": "2026-10-12T00:00:36.000Z",
+        "block": 9263386,
+        "extrinsic": "9263386-0018",
+        "sn28Alpha": 199.320432167,
+        "sn90Alpha": 267.680345809,
+        "taoValue": 4.990394632,
+        "usdValue": 1473.99,
+        "link": "https://www.tao.app/extrinsic/9263386-0018"
+      },
+      {
+        "ts": "2026-10-09T00:00:36.000Z",
+        "block": 9241786,
+        "extrinsic": "9241786-0014",
+        "sn28Alpha": 60.697269015,
+        "sn90Alpha": 69.329521839,
+        "taoValue": 1.457538557,
+        "usdValue": 391.06,
+        "link": "https://www.tao.app/extrinsic/9241786-0014"
+      },
+      {
+        "ts": "2026-10-08T00:00:36.000Z",
+        "block": 9234590,
+        "extrinsic": "9234590-0040",
+        "sn28Alpha": 61.12296524,
+        "sn90Alpha": 68.474489162,
+        "taoValue": 1.46437576,
+        "usdValue": 426.58,
+        "link": "https://www.tao.app/extrinsic/9234590-0040"
+      },
+      {
+        "ts": "2026-10-07T00:00:36.000Z",
+        "block": 9227390,
+        "extrinsic": "9227390-0034",
+        "sn28Alpha": 62.881466201,
+        "sn90Alpha": 66.362532379,
+        "taoValue": 1.409085655,
+        "usdValue": 434.89,
+        "link": "https://www.tao.app/extrinsic/9227390-0034"
+      },
+      {
+        "ts": "2026-10-06T00:00:36.000Z",
+        "block": 9220190,
+        "extrinsic": "9220190-0035",
+        "sn28Alpha": 104.981644814,
+        "sn90Alpha": 104.979034129,
+        "taoValue": 2.238383619,
+        "usdValue": 683.23,
+        "link": "https://www.tao.app/extrinsic/9220190-0035"
+      },
+      {
+        "ts": "2026-10-04T00:00:36.000Z",
+        "block": 9205790,
+        "extrinsic": "9205790-0014",
+        "sn28Alpha": 87.784661351,
+        "sn90Alpha": 83.027571839,
+        "taoValue": 1.889145434,
+        "usdValue": 579.31,
+        "link": "https://www.tao.app/extrinsic/9205790-0014"
+      },
+      {
+        "ts": "2026-10-02T00:00:36.000Z",
+        "block": 9191390,
+        "extrinsic": "9191390-0014",
+        "sn28Alpha": 262.356816379,
+        "sn90Alpha": 234.202812887,
+        "taoValue": 5.534048314,
+        "usdValue": 1678.03,
+        "link": "https://www.tao.app/extrinsic/9191390-0014"
+      },
+      {
+        "ts": "2026-09-27T00:00:36.000Z",
+        "block": 9155391,
+        "extrinsic": "9155391-0018",
+        "sn28Alpha": 82.853649995,
+        "sn90Alpha": 86.736788451,
+        "taoValue": 1.804377459,
+        "usdValue": 579.54,
+        "link": "https://www.tao.app/extrinsic/9155391-0018"
+      },
+      {
+        "ts": "2026-09-25T00:00:36.000Z",
+        "block": 9140991,
+        "extrinsic": "9140991-0030",
+        "sn28Alpha": 78.809318876,
+        "sn90Alpha": 76.433819991,
+        "taoValue": 1.677971563,
+        "usdValue": 497.14,
+        "link": "https://www.tao.app/extrinsic/9140991-0030"
+      },
+      {
+        "ts": "2026-09-23T00:00:36.000Z",
+        "block": 9126597,
+        "extrinsic": "9126597-0021",
+        "sn28Alpha": 62.945450807,
+        "sn90Alpha": 61.299432978,
+        "taoValue": 1.371354318,
+        "usdValue": 431.18,
+        "link": "https://www.tao.app/extrinsic/9126597-0021"
+      },
+      {
+        "ts": "2026-09-22T00:00:48.001Z",
+        "block": 9119399,
+        "extrinsic": "9119399-0027",
+        "sn28Alpha": 129.227571662,
+        "sn90Alpha": 120.734777929,
+        "taoValue": 2.828764022,
+        "usdValue": 890.12,
+        "link": "https://www.tao.app/extrinsic/9119399-0027"
+      },
+      {
+        "ts": "2026-09-18T13:46:12.000Z",
+        "block": 9094924,
+        "extrinsic": "9094924-0029",
+        "sn28Alpha": 63.369068177,
+        "sn90Alpha": 44.719887996,
+        "taoValue": 1.330910997,
+        "usdValue": 333.18,
+        "link": "https://www.tao.app/extrinsic/9094924-0029"
+      },
+      {
+        "ts": "2026-09-17T00:00:36.000Z",
+        "block": 9083652,
+        "extrinsic": "9083652-0013",
+        "sn28Alpha": 81.699887254,
+        "sn90Alpha": 52.148689324,
+        "taoValue": 1.757610185,
+        "usdValue": 390.21,
+        "link": "https://www.tao.app/extrinsic/9083652-0013"
+      },
+      {
+        "ts": "2026-09-15T00:00:36.000Z",
+        "block": 9069320,
+        "extrinsic": "9069320-0011",
+        "sn28Alpha": 47.028698374,
+        "sn90Alpha": 31.971211276,
+        "taoValue": 1.087174052,
+        "usdValue": 252.66,
+        "link": "https://www.tao.app/extrinsic/9069320-0011"
+      },
+      {
+        "ts": "2026-09-13T00:00:24.000Z",
+        "block": 9054951,
+        "extrinsic": "9054951-0016",
+        "sn28Alpha": 59.656695906,
+        "sn90Alpha": 38.784836563,
+        "taoValue": 1.250506401,
+        "usdValue": 291.33,
+        "link": "https://www.tao.app/extrinsic/9054951-0016"
+      },
+      {
+        "ts": "2026-09-10T00:00:36.000Z",
+        "block": 9033401,
+        "extrinsic": "9033401-0012",
+        "sn28Alpha": 53.472279901,
+        "sn90Alpha": 38.488473092,
+        "taoValue": 1.098482944,
+        "usdValue": 279.26,
+        "link": "https://www.tao.app/extrinsic/9033401-0012"
+      },
+      {
+        "ts": "2026-09-07T00:00:36.000Z",
+        "block": 9011828,
+        "extrinsic": "9011828-0017",
+        "sn28Alpha": 52.046329559,
+        "sn90Alpha": 41.931709433,
+        "taoValue": 1.114527375,
+        "usdValue": 295.7,
+        "link": "https://www.tao.app/extrinsic/9011828-0017"
+      },
+      {
+        "ts": "2026-09-04T00:00:24.000Z",
+        "block": 8990266,
+        "extrinsic": "8990266-0025",
+        "sn28Alpha": 132.512867976,
+        "sn90Alpha": 92.358800879,
+        "taoValue": 2.749957971,
+        "usdValue": 620.97,
+        "link": "https://www.tao.app/extrinsic/8990266-0025"
+      },
+      {
+        "ts": "2026-09-01T00:00:36.000Z",
+        "block": 8968670,
+        "extrinsic": "8968670-0019",
+        "sn28Alpha": 63.403577123,
+        "sn90Alpha": 35.607429931,
+        "taoValue": 1.168434238,
+        "usdValue": 269,
+        "link": "https://www.tao.app/extrinsic/8968670-0019"
+      },
+      {
+        "ts": "2026-08-29T00:00:36.001Z",
+        "block": 8947070,
+        "extrinsic": "8947070-0009",
+        "sn28Alpha": 99.166418696,
+        "sn90Alpha": 55.476869694,
+        "taoValue": 1.980518645,
+        "usdValue": 468.6,
+        "link": "https://www.tao.app/extrinsic/8947070-0009"
+      },
+      {
+        "ts": "2026-08-27T00:00:48.000Z",
+        "block": 8932673,
+        "extrinsic": "8932673-0013",
+        "sn28Alpha": 129.749523867,
+        "sn90Alpha": 56.218960481,
+        "taoValue": 2.531066185,
+        "usdValue": 594.29,
+        "link": "https://www.tao.app/extrinsic/8932673-0013"
+      },
+      {
+        "ts": "2026-08-26T10:34:36.000Z",
+        "block": 8928642,
+        "extrinsic": "8928642-0009",
+        "sn28Alpha": 415.744615131,
+        "sn90Alpha": 160.74004597,
+        "taoValue": 7.563403942,
+        "usdValue": 1783.16,
+        "link": "https://www.tao.app/extrinsic/8928642-0009"
+      },
+      {
+        "ts": "2026-08-25T00:01:12.000Z",
+        "block": 8918275,
+        "extrinsic": "8918275-0014",
+        "sn28Alpha": 355.615224961,
+        "sn90Alpha": 135.432728379,
+        "taoValue": 6.150000515,
+        "usdValue": 1477.88,
+        "link": "https://www.tao.app/extrinsic/8918275-0014"
+      },
+      {
+        "ts": "2026-08-24T00:00:36.001Z",
+        "block": 8911072,
+        "extrinsic": "8911072-0026",
+        "sn28Alpha": 130.996684132,
+        "sn90Alpha": 53.626272945,
+        "taoValue": 2.245405412,
+        "usdValue": 534.24,
+        "link": "https://www.tao.app/extrinsic/8911072-0026"
+      },
+      {
+        "ts": "2026-08-23T15:00:36.000Z",
+        "block": 8908372,
+        "extrinsic": "8908372-0015",
+        "sn28Alpha": 278.435627553,
+        "sn90Alpha": 106.980765759,
+        "taoValue": 4.622173363,
+        "usdValue": 1081.13,
+        "link": "https://www.tao.app/extrinsic/8908372-0015"
+      },
+      {
+        "ts": "2026-08-23T14:13:48.000Z",
+        "block": 8908138,
+        "extrinsic": "8908138-0009",
+        "sn28Alpha": 680.830650848,
+        "sn90Alpha": 260.511671182,
+        "taoValue": 11.319481143,
+        "usdValue": 2628.94,
+        "link": "https://www.tao.app/extrinsic/8908138-0009"
+      },
+      {
+        "ts": "2026-08-23T14:00:36.000Z",
+        "block": 8908072,
+        "extrinsic": "8908072-0011",
+        "sn28Alpha": 0,
+        "sn90Alpha": 0,
+        "taoValue": 0,
+        "usdValue": 0,
+        "link": "https://www.tao.app/extrinsic/8908072-0011"
+      },
+      {
+        "ts": "2026-08-23T13:00:36.000Z",
+        "block": 8907772,
+        "extrinsic": "8907772-0011",
+        "sn28Alpha": 134.452693777,
+        "sn90Alpha": 52.576114873,
+        "taoValue": 2.24246772,
+        "usdValue": 506.95,
+        "link": "https://www.tao.app/extrinsic/8907772-0011"
+      }
+    ],
+    "totals": {
+      "sn28Alpha": 5458.474426171,
+      "sn90Alpha": 4999.244892775999,
+      "taoValue": 124.50757466299999,
+      "usdValue": 32238.770000000004,
+      "count": 52
+    }
+  },
+  "sn28": {
+    "count": 250,
+    "hotkeys": [
+      {
+        "uid": 44,
+        "hotkey": "5EvosuiYGEf8xqDfHVyQcyPD1BjN1fDjyqLdhHMRMawPo42Y",
+        "coldkey": "5C9y6fnLPSzBeh1Np7f4DnGen42xV29nL9qZTDuwpVC4iTEE",
+        "incentive": 0.0186617838,
+        "emission": 2.756183984,
+        "dailyMiningAlpha": 55.089893258,
+        "alphaStake": 16.280423212,
+        "validatorPermit": false,
+        "isOwner": false,
+        "isKubeTEE": true,
+        "active": false,
+        "registeredAtBlock": 8864149,
+        "link": "https://taostats.io/neurons?netuid=28&uid=44"
+      }
+    ]
+  }
+}

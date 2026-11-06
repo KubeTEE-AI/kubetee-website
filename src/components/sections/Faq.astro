@@ -1,0 +1,34 @@
+---
+import Container from "../ui/Container.astro";
+import SectionLabel from "../ui/SectionLabel.astro";
+import { faq } from "../../content/site";
+---
+
+<section id="faq" aria-labelledby="faq-title" class="border-b border-line py-20 md:py-28">
+  <Container>
+    <SectionLabel number="06">{faq.kicker}</SectionLabel>
+    <h2
+      id="faq-title"
+      class="mt-6 max-w-[16ch] text-[clamp(2.5rem,5vw,4.5rem)] font-light leading-[1.02] tracking-[-0.03em] text-body"
+    >
+      {faq.title}
+    </h2>
+
+    <div class="mt-12 max-w-6xl border-t border-line">
+      {faq.items.map((item) => (
+        <details class="group border-b border-line">
+          <summary class="flex cursor-pointer list-none items-center justify-between gap-6 py-5 text-lg font-normal text-body [&::-webkit-details-marker]:hidden">
+            {item.question}
+            <span
+              aria-hidden="true"
+              class="text-xl text-brand transition-transform group-open:rotate-45"
+            >
+              +
+            </span>
+          </summary>
+          <p class="max-w-[70ch] pb-5 text-sm leading-6 text-muted">{item.answer}</p>
+        </details>
+      ))}
+    </div>
+  </Container>
+</section>

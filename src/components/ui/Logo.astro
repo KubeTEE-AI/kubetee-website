@@ -1,0 +1,9 @@
+---
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<img src="/brand/kubetee-logo.svg" alt="KubeTEE" width="200" height="43" class={className} />

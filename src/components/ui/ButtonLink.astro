@@ -1,0 +1,30 @@
+---
+import { isExternalHref } from "../../lib/links";
+
+interface Props {
+  href: string;
+  variant?: "primary" | "secondary";
+  class?: string;
+}
+
+const { href, variant = "primary", class: className } = Astro.props;
+const external = isExternalHref(href);
+
+const variants = {
+  primary: "bg-brand text-stage hover:bg-brand-strong focus-visible:outline-brand",
+  secondary: "border border-line text-body hover:border-brand/60 hover:text-brand",
+};
+---
+
+<a
+  href={href}
+  target={external ? "_blank" : undefined}
+  rel={external ? "noopener noreferrer" : undefined}
+  class:list={[
+    "inline-flex min-h-11 items-center justify-center px-5 py-3 text-sm font-medium transition-colors",
+    variants[variant],
+    className,
+  ]}
+>
+  <slot />
+</a>
