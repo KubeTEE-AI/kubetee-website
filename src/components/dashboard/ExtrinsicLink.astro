@@ -1,0 +1,20 @@
+---
+import type { Fill } from "../../lib/dashboard";
+
+interface Props {
+  fill: Fill;
+}
+
+const { fill } = Astro.props;
+---
+
+<a
+  href={fill.link}
+  target="_blank"
+  rel="noopener noreferrer"
+  aria-label={`Open extrinsic ${fill.extrinsic} on tao.app in a new tab`}
+  class="font-mono text-xs text-brand underline decoration-brand/30 underline-offset-2 transition-colors hover:text-brand-strong"
+>
+  {fill.extrinsic}
+  <span aria-hidden="true"> ↗</span>
+</a>

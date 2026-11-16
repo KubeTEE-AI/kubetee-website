@@ -1,0 +1,18 @@
+---
+interface Props {
+  text: string;
+}
+
+const { text } = Astro.props;
+const index = text.indexOf("α");
+---
+
+{index === -1 ? (
+  text
+) : (
+  <>
+    {text.slice(0, index)}
+    <span class="normal-case">α</span>
+    {text.slice(index + 1)}
+  </>
+)}

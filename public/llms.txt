@@ -1,0 +1,25 @@
+# KubeTEE
+
+> KubeTEE is Bittensor subnet 90 (SN90): decentralized GPU clusters turned into a confidential AI factory, with inference and AI workloads running inside hardware-secured Trusted Execution Environments (Intel TDX, AMD SEV-SNP).
+
+KubeTEE runs confidential inference today through an OpenAI-compatible gateway and sayGM. Workloads are isolated with Kata Containers and Confidential Containers; a nonce-bound hardware quote proves the guest measurement, and CoCo Trustee/KBS release secrets only to an attested guest. The site also publishes an on-chain SN28 -> SN90 alpha recycle dashboard.
+
+## Pages
+
+- [KubeTEE overview](/): what KubeTEE is, the four pillars, how a request moves from GPU cluster to attested inference, live status, roadmap, and FAQ.
+- [SN28 -> SN90 recycle dashboard](/dashboard): every alpha recycle fill with its extrinsic, daily swap value in USD, and the raw JSON.
+
+## Documentation and services
+
+- [Architecture, attestation, and cluster docs](https://github.com/KubeTEE-AI/kubetee-subnet/blob/main/README.md)
+- [OpenAI-compatible inference gateway](https://llm.kubetee.ai)
+- [Validator dashboard](https://s3.hippius.com/kubetee-validator/index.html)
+- [How the SN28 -> SN90 recycler works](https://github.com/KubeTEE-AI/kubetee-subnet/blob/main/docs/SN28-SN90-ALPHA-RECYCLE.md)
+- [Raw dashboard data (JSON)](/dashboard.json)
+
+## Optional
+
+- [GitHub organization](https://github.com/KubeTEE-AI)
+- [Discord](https://discord.gg/7SsA8Jw5J)
+- [X](https://x.com/KubeTEEAI)
+- [sayGM](https://saygm.com/)

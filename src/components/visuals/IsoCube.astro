@@ -1,0 +1,53 @@
+---
+interface Props {
+  cx: number;
+  top: number;
+  size: number;
+  topFill?: string;
+  topOpacity?: number;
+  leftFill?: string;
+  rightFill?: string;
+}
+
+const {
+  cx,
+  top,
+  size,
+  topFill = "#83BB7B",
+  topOpacity = 0.22,
+  leftFill = "#151A1F",
+  rightFill = "#27282A",
+} = Astro.props;
+
+const right = cx + size;
+const bottom = top + size;
+const leftX = cx - size;
+const sideTop = top + size * 0.5;
+const sideBottom = top + size * 1.4;
+const centerBottom = top + size * 1.9;
+---
+
+<g>
+  <path
+    d={`M${cx} ${top}L${right} ${sideTop}L${cx} ${bottom}L${leftX} ${sideTop}Z`}
+    fill={topFill}
+    fill-opacity={topOpacity}
+    stroke="rgba(131,187,123,0.5)"
+    stroke-width="1"
+    vector-effect="non-scaling-stroke"
+  ></path>
+  <path
+    d={`M${leftX} ${sideTop}L${cx} ${bottom}L${cx} ${centerBottom}L${leftX} ${sideBottom}Z`}
+    fill={leftFill}
+    stroke="rgba(255,255,255,0.12)"
+    stroke-width="1"
+    vector-effect="non-scaling-stroke"
+  ></path>
+  <path
+    d={`M${cx} ${bottom}L${right} ${sideTop}L${right} ${sideBottom}L${cx} ${centerBottom}Z`}
+    fill={rightFill}
+    stroke="rgba(255,255,255,0.12)"
+    stroke-width="1"
+    vector-effect="non-scaling-stroke"
+  ></path>
+</g>

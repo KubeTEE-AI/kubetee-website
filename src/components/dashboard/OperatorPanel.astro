@@ -1,0 +1,78 @@
+---
+import { dashboard } from "../../content/dashboard";
+import {
+  type DashboardSummary,
+  formatAlpha,
+  formatDate,
+  formatShare,
+  shortKey,
+} from "../../lib/dashboard";
+
+interface Props {
+  summary: DashboardSummary;
+}
+
+const { summary } = Astro.props;
+const { miner } = summary;
+---
+
+<aside aria-labelledby="operator-title">
+  <p class="label-mono text-faint">{dashboard.operator.label}</p>
+  <h2 id="operator-title" class="mt-3 text-lg font-normal text-body">
+    {dashboard.operator.title}
+  </h2>
+
+  {miner ? (
+    <>
+      <dl class="mt-5 border-t border-line text-sm">
+        <div class="flex items-baseline justify-between gap-4 border-b border-line py-2.5">
+          <dt class="text-muted">{dashboard.operator.uid}</dt>
+          <dd class="font-mono tabular-nums text-body">{miner.uid}</dd>
+        </div>
+        <div class="flex items-baseline justify-between gap-4 border-b border-line py-2.5">
+          <dt class="text-muted">{dashboard.operator.incentive}</dt>
+          <dd class="font-mono tabular-nums text-body">{formatShare(miner.incentive)}</dd>
+        </div>
+        <div class="flex items-baseline justify-between gap-4 border-b border-line py-2.5">
+          <dt class="text-muted">{dashboard.operator.dailyMining}</dt>
+          <dd class="font-mono tabular-nums text-body">{formatAlpha(miner.dailyMiningAlpha)}</dd>
+        </div>
+        <div class="flex items-baseline justify-between gap-4 border-b border-line py-2.5">
+          <dt class="text-muted">{dashboard.operator.alphaStake}</dt>
+          <dd class="font-mono tabular-nums text-body">{formatAlpha(miner.alphaStake)}</dd>
+        </div>
+        <div class="flex items-baseline justify-between gap-4 border-b border-line py-2.5">
+          <dt class="text-muted">{dashboard.operator.hotkey}</dt>
+          <dd>
+            <a
+              href={miner.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`View miner ${miner.hotkey} on TaoStats in a new tab`}
+              class="font-mono text-xs text-brand underline decoration-brand/30 underline-offset-2 transition-colors hover:text-brand-strong"
+            >
+              {shortKey(miner.hotkey, 8, 7)}
+              <span aria-hidden="true"> ↗</span>
+            </a>
+          </dd>
+        </div>
+      </dl>
+
+      <p class="mt-5 max-w-[38ch] text-xs leading-5 text-faint">
+        {dashboard.operator.note} SN28 had {summary.sn28Count.toLocaleString("en-US")} registered
+        hotkeys on {formatDate(summary.generatedAt)}.
+      </p>
+
+      <a
+        href={dashboard.links.subnet}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="mt-4 inline-flex min-h-8 items-center text-sm font-medium text-brand transition-colors hover:text-brand-strong"
+      >
+        {dashboard.operator.link} <span aria-hidden="true">→</span>
+      </a>
+    </>
+  ) : (
+    <p class="mt-5 text-sm leading-6 text-muted">{dashboard.operator.unavailable}</p>
+  )}
+</aside>

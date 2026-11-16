@@ -1,0 +1,68 @@
+---
+import { dashboard } from "../../content/dashboard";
+import { type DailyPoint, formatUsd, formatUsdExact } from "../../lib/dashboard";
+
+interface Props {
+  series: DailyPoint[];
+}
+
+const { series } = Astro.props;
+---
+
+<details class="group mt-4 border-t border-line pt-3">
+  <summary class="flex cursor-pointer list-none items-center justify-between gap-4 py-1 text-xs text-faint transition-colors hover:text-body [&::-webkit-details-marker]:hidden">
+    <span class="label-mono">
+      {dashboard.chart.detailsLabel} ({series.length})
+    </span>
+    <span
+      aria-hidden="true"
+      class="text-base leading-none text-brand transition-transform group-open:rotate-45"
+    >
+      +
+    </span>
+  </summary>
+
+  <table class="mt-3 w-full border-separate border-spacing-0 text-xs">
+    <caption class="sr-only">{dashboard.chart.detailsCaption}</caption>
+    <thead>
+      <tr>
+        <th
+          scope="col"
+          class="border-b border-line py-2 text-left font-normal label-mono text-faint"
+        >
+          Date (UTC)
+        </th>
+        <th
+          scope="col"
+          class="border-b border-line py-2 text-right font-normal label-mono text-faint"
+        >
+          Fills
+        </th>
+        <th
+          scope="col"
+          class="border-b border-line py-2 text-right font-normal label-mono text-faint"
+        >
+          USD est.
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      {series.map((point) => (
+        <tr>
+          <td class="border-b border-line py-1.5 text-muted">
+            <time datetime={point.date}>{point.label}</time>
+          </td>
+          <td class="border-b border-line py-1.5 text-right font-mono tabular-nums text-muted">
+            {point.fills}
+          </td>
+          <td
+            title={formatUsdExact(point.usd)}
+            class="border-b border-line py-1.5 text-right font-mono tabular-nums text-body"
+          >
+            {formatUsd(point.usd)}
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</details>

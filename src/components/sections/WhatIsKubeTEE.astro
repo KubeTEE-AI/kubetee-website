@@ -1,0 +1,37 @@
+---
+import Container from "../ui/Container.astro";
+import SectionLabel from "../ui/SectionLabel.astro";
+import ProtectionAsset from "../visuals/ProtectionAsset.astro";
+import { what } from "../../content/site";
+---
+
+<section id="what" aria-labelledby="what-title" class="border-b border-line py-20 md:py-28">
+  <Container>
+    <SectionLabel number="01">{what.kicker}</SectionLabel>
+
+    <h2
+      id="what-title"
+      class="mt-4 w-full text-[clamp(2rem,3.6vw,3.25rem)] font-light leading-[1.05] tracking-[-0.03em] text-body lg:w-1/2"
+    >
+      {what.title}
+    </h2>
+
+    <p class="mt-4 max-w-[60ch] text-sm leading-6 text-muted lg:max-w-[55ch]">{what.intro}</p>
+
+    <div class="mt-10 grid gap-px border border-line bg-line md:grid-cols-3">
+      {what.assets.map((asset) => (
+        <article class="asset-card p-4 md:p-6">
+          <div class="asset-main">
+            <ProtectionAsset variant={asset.variant} />
+            <p class="mt-5 text-xs font-medium uppercase tracking-[0.14em] text-brand">
+              {asset.label}
+            </p>
+            <h3 class="mt-2 text-lg font-normal text-body">{asset.title}</h3>
+            <p class="mt-2 text-sm leading-6 text-muted">{asset.caption}</p>
+          </div>
+          <p class="asset-extra mt-2 text-sm leading-6 text-muted">{asset.detail}</p>
+        </article>
+      ))}
+    </div>
+  </Container>
+</section>

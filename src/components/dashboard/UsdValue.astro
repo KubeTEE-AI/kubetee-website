@@ -1,0 +1,18 @@
+---
+import { formatUsd, formatUsdExact } from "../../lib/dashboard";
+
+interface Props {
+  value: number | null;
+}
+
+const { value } = Astro.props;
+---
+
+{value == null ? (
+  <>
+    <span aria-hidden="true">—</span>
+    <span class="sr-only">Not reported</span>
+  </>
+) : (
+  <span title={formatUsdExact(value)}>{formatUsd(value)}</span>
+)}

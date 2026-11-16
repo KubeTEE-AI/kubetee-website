@@ -1,0 +1,181 @@
+---
+import Container from "../ui/Container.astro";
+import Logo from "../ui/Logo.astro";
+import { hero, nav, site } from "../../content/site";
+import { isExternalHref } from "../../lib/links";
+
+interface Props {
+  activeHref?: string;
+}
+
+const { activeHref } = Astro.props;
+const links = nav;
+---
+
+<header class="site-header sticky top-0 z-40 border-b border-line">
+  <Container class="flex h-[72px] items-center justify-between gap-4 xl:gap-6">
+    <a href="/" aria-label="KubeTEE home" class="flex h-[72px] shrink-0 items-center">
+      <Logo class="w-[156px] md:w-[200px]" />
+    </a>
+
+    <nav aria-label="Primary" class="hidden items-center gap-6 lg:flex">
+      {links.map((item) => {
+        const external = isExternalHref(item.href);
+        const active = activeHref === item.href;
+        return (
+          <a
+            href={item.href}
+            target={external ? "_blank" : undefined}
+            rel={external ? "noopener noreferrer" : undefined}
+            aria-current={active ? "page" : undefined}
+            class:list={[
+              "relative text-sm transition-colors after:absolute after:inset-x-0 after:-bottom-2 after:h-px after:bg-brand after:opacity-0 after:transition-opacity after:content-['']",
+              active ? "text-body after:opacity-100" : "text-muted hover:text-body",
+            ]}
+          >
+            {item.label}
+          </a>
+        );
+      })}
+      <a
+        href={site.links.github}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex min-h-8 items-center text-sm text-muted transition-colors hover:text-body"
+      >
+        GitHub
+      </a>
+    </nav>
+
+    <a
+      href={hero.primaryCta.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="hidden min-h-11 items-center justify-center bg-brand px-4 py-2.5 text-sm font-medium text-stage transition-colors hover:bg-brand-strong lg:inline-flex"
+    >
+      {hero.primaryCta.label}
+    </a>
+
+    <div class="lg:hidden">
+      <button
+        type="button"
+        data-menu-trigger
+        aria-expanded="false"
+        aria-controls="mobile-navigation"
+        class="label-mono inline-flex min-h-11 items-center border border-line px-3 py-2 text-body"
+      >
+        Menu
+      </button>
+    </div>
+  </Container>
+
+  <dialog
+    id="mobile-navigation"
+    data-menu-dialog
+    aria-label="Navigation"
+    class="menu-dialog text-body"
+  >
+    <div class="flex items-center justify-between border-b border-line pb-4">
+      <span class="label-mono text-muted">Navigation</span>
+      <button
+        type="button"
+        data-menu-close
+        class="label-mono inline-flex min-h-11 items-center border border-line px-3 py-2 text-body"
+      >
+        Close
+      </button>
+    </div>
+
+    <nav aria-label="Mobile primary" class="mt-6 flex flex-col">
+      {links.map((link) => {
+        const external = isExternalHref(link.href);
+        const active = activeHref === link.href;
+        return (
+          <a
+            href={link.href}
+            target={external ? "_blank" : undefined}
+            rel={external ? "noopener noreferrer" : undefined}
+            aria-current={active ? "page" : undefined}
+            class:list={[
+              "border-b border-line py-4 text-2xl font-light",
+              active ? "text-brand" : "text-body",
+            ]}
+          >
+            {link.label}
+          </a>
+        );
+      })}
+      <a
+        href={site.links.github}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="border-b border-line py-4 text-2xl font-light text-muted"
+      >
+        GitHub
+      </a>
+      <a
+        href={hero.primaryCta.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="mt-6 inline-flex min-h-12 items-center justify-center bg-brand px-5 py-3 text-sm font-medium text-stage"
+      >
+        {hero.primaryCta.label}
+      </a>
+    </nav>
+  </dialog>
+</header>
+
+<script>
+  const headerRoot = document.documentElement;
+  let headerFrame = 0;
+
+  const updateHeader = () => {
+    headerFrame = 0;
+    headerRoot.toggleAttribute("data-scrolled", window.scrollY > 8);
+  };
+
+  const onHeaderScroll = () => {
+    if (headerFrame) return;
+    headerFrame = window.requestAnimationFrame(updateHeader);
+  };
+
+  updateHeader();
+  window.addEventListener("scroll", onHeaderScroll, { passive: true });
+
+  const dialog = document.querySelector<HTMLDialogElement>("[data-menu-dialog]");
+  const trigger = document.querySelector<HTMLButtonElement>("[data-menu-trigger]");
+  const closeButton = document.querySelector<HTMLButtonElement>("[data-menu-close]");
+
+  if (dialog && trigger && closeButton) {
+    const openMenu = () => {
+      dialog.showModal();
+      headerRoot.setAttribute("data-menu-open", "");
+      headerRoot.style.overflow = "hidden";
+      trigger.setAttribute("aria-expanded", "true");
+      closeButton.focus({ preventScroll: true });
+    };
+
+    const closeMenu = () => {
+      if (dialog.open) dialog.close();
+    };
+
+    dialog.addEventListener("close", () => {
+      headerRoot.removeAttribute("data-menu-open");
+      headerRoot.style.overflow = "";
+      trigger.setAttribute("aria-expanded", "false");
+      trigger.focus({ preventScroll: true });
+    });
+
+    dialog.querySelectorAll("a").forEach((link) => {
+      link.addEventListener("click", closeMenu);
+    });
+
+    trigger.addEventListener("click", openMenu);
+    closeButton.addEventListener("click", closeMenu);
+
+    const desktop = window.matchMedia("(min-width: 1024px)");
+    desktop.addEventListener("change", (event) => {
+      if (event.matches) closeMenu();
+    });
+  }
+</script>

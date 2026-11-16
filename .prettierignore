@@ -1,0 +1,14 @@
+.astro/
+dist/
+node_modules/
+pnpm-lock.yaml
+
+# Generated dashboard data — owned by scripts/fetch-dashboard-data.mjs
+public/dashboard.json
+src/data/dashboard.json
+
+# Static assets
+public/brand/
+public/llms.txt
+public/manifest.webmanifest
+public/robots.txt
