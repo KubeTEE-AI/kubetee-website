@@ -127,6 +127,7 @@
             "effective_vcpus": {"type": "integer", "minimum": 1},
             "cpu_family": {"const": "EPYC-v4"},
             "kernel_cmdline_sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+            "kernel_cmdline_terminator": {"type": "string", "enum": ["none", "nul"]},
             "composition_ref": {"type": "string", "format": "uri"},
             "agent_policy_ref": {"type": "string", "format": "uri"},
             "exec_process_allowed": {"const": false}

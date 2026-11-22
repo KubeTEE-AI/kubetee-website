@@ -85,7 +85,8 @@
       "kernel_sha256": "sha256:e127fbb650655fa8bb1d9f6988ebe123ef1f27155b2b30843d9ef1dc4a4e373c",
       "effective_vcpus": 9,
       "cpu_family": "EPYC-v4",
-      "kernel_cmdline_sha256": "sha256:24fb4e1f4baa13988abd35471e22d660836af29d485dfba340f2acdc7b452865",
+      "kernel_cmdline_sha256": "sha256:4e1353ceb3239c23ca26277859451584eddd8dd57cd63f82872724b77c83cf8a",
+      "kernel_cmdline_terminator": "nul",
       "composition_ref": "https://github.com/kata-containers/kata-containers/blob/4.4.0/versions.yaml",
       "agent_policy_ref": "https://github.com/pamanseau/kubetee-fleet/blob/5aa89c71e7bd25af8a75d7cb9ab518632a56817a/infrastructure/kubetee/infrastructure/litellm/production/initdata-litellm.toml",
       "exec_process_allowed": false
@@ -129,6 +130,6 @@
     "alg": "ed25519",
     "key_id": "kubetee-measurements-2026-11-22",
     "canonicalization": "RFC8785-without-signature-member",
-    "sig": "D6Pb3pgxFVIER1rbzlnipmTduIza67dp1byDWITnYBYb5F0adaBHrk_yjKj9BY5w1SmfjuH9CVFync0UGiVvDQ"
+    "sig": "5YHZmOh9PwPm1ragrVzmlwKC0tbEZ5j17NK7g2_boN0VJcMhmqhyOLkI3sjqw7jKMfWqKJAl9boRJ4mWNY_PCQ"
   }
 }
