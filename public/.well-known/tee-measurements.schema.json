@@ -1,0 +1,197 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kubetee.ai/.well-known/tee-measurements.schema.json",
+  "title": "KubeTEE SNP measured release projection, schema 2",
+  "description": "Immutable SNP measurement reference. It does not assert which release is currently served; physical attestation and replica verification do. Role-scoped version streams prevent unrelated workflow from revoking live gateway references. The public registry is signed, and its key is independent of a claimed guest keyset. A separate mutable pointer is not a trust anchor for immutable reference retention. Intel TDX projection schema 1 uses its TDX-specific parser, not SNP fallback fields. Past records are retained; revoke marks a signed compromise, not merely a newer release.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "version", "role", "tee", "runtime_class", "status",
+    "not_before", "key_id", "subject", "provenance", "snp", "signature"
+  ],
+  "properties": {
+    "schema": {"const": "kubetee.tee-measurements/2"},
+    "version": {"type": "integer", "minimum": 0},
+    "role": {"const": "litellm"},
+    "tee": {"const": "snp"},
+    "runtime_class": {"const": "kata-qemu-snp-runtime-rs"},
+    "status": {"enum": ["upcoming", "active", "revoked"]},
+    "not_before": {"type": "string", "format": "date-time"},
+    "not_after": {"type": "string", "format": "date-time"},
+    "revocation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["reason", "revoked_at"],
+      "properties": {
+        "reason": {"type": "string", "minLength": 1},
+        "revoked_at": {"type": "string", "format": "date-time"},
+        "replacement_version": {"type": "integer", "minimum": 0}
+      }
+    },
+    "key_id": {"type": "string", "pattern": "^kubetee-measurements-[A-Za-z0-9_-]+$"},
+    "key_url": {"const": "https://kubetee.ai/.well-known/tee-measurements-signing-key-2026.json"},
+    "subject": {"const": "litellm-database", "description": "Gateway role/container logical name. sidecar init transports are separate and measured by the same InitData policy."},
+    "provenance": {
+      "type": "object", "additionalProperties": false,
+      "required": ["source_repo", "source_commit", "base_image", "image_ref", "amd64_manifest_digest", "build_run", "cosign_identity", "cosign_oidc_issuer"],
+      "properties": {
+        "source_repo": {"const": "https://github.com/KubeTEE-AI/litellm"},
+        "source_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "base_image": {"type": "string", "pattern": "^ghcr\\.io/berriai/litellm-database@sha256:[0-9a-f]{64}$"},
+        "image_ref": {"$ref": "#/$defs/ociReference"},
+        "amd64_manifest_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "build_run": {"type": "string", "format": "uri", "pattern": "^https://github.com/KubeTEE-AI/litellm/actions/runs/[0-9]+$"},
+        "cosign_bundle": {"type": "string", "format": "uri"},
+        "cosign_identity": {"const": "https://github.com/KubeTEE-AI/litellm/.github/workflows/build-litellm-overlay.yaml@refs/heads/kubetee-prod"},
+        "cosign_oidc_issuer": {"const": "https://token.actions.githubusercontent.com"}
+      }
+    },
+    "snp": {
+      "type": "object", "additionalProperties": false,
+      "required": ["launch_measurement", "host_data", "report_data", "report_version", "vmpl", "policy", "guest"],
+      "properties": {
+        "launch_measurement": {
+          "type": "object", "additionalProperties": false,
+          "required": ["sha384", "derivation", "tool", "tool_source", "tool_artifact_sha256"],
+          "properties": {
+            "sha384": {"$ref": "#/$defs/sha384"},
+            "derivation": {"const": "independent-recomputation-and-live-report"},
+            "tool": {"const": "sev-snp-measure"},
+            "tool_source": {"type": "string", "format": "uri"},
+            "tool_artifact_sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+            "observed_pod_identities": {"$ref": "#/$defs/observedPods"},
+            "observed_ref": {"type": "string", "format": "uri"},
+            "derivation_ref": {"type": "string", "format": "uri"}
+          }
+        },
+        "host_data": {
+          "type": "object", "additionalProperties": false,
+"required": ["sha384_uncompressed_initdata_toml", "sha384_uncompressed_initdata_toml_prefix32"],
+      "description": "Kata 4.4.0 SHA-384 hashes the exact uncompressed InitData TOML, truncates to 32 bytes, and passes that prefix as SNP HOST_DATA. This is not the TDX MRCONFIGID or any SHA-256 substitution.",
+          "properties": {
+            "sha384_uncompressed_initdata_toml": {"type": "string", "pattern": "^sha384:[0-9a-f]{96}$"},
+            "sha384_uncompressed_initdata_toml_prefix32": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            "semantics": {"const": "kata4-sha384-uncompressed-initdata-toml-prefix32"},
+            "compressed_blob_sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+          }
+        },
+        "report_data": {
+          "type": "object", "additionalProperties": false,
+          "required": ["schema", "purpose", "algorithm", "size",
+            "keyset_digest", "nonce"],
+          "properties": {
+            "schema": {"const": "kubetee.attestation.v1"},
+            "purpose": {"const": "kubetee.attestation.v1"},
+            "algorithm": {"const": "sha256-rfc8785-statement-then-32-zero-bytes"},
+            "statement": {"const": "{\"keyset_digest\":\"sha256:<hex>\",\"nonce\":\"<64-hex>\",\"purpose\":\"kubetee.attestation.v1\"}"},
+            "size": {"const": 64},
+            "keyset_digest": {"const": "sha256-rfc8785-keyset"},
+            "nonce": {"const": "caller-supplied-64-lowercase-hex"},
+            "certificate_anchor": {"const": "vcek-amd-snp"},
+            "report_versions": {"const": [3, 4, 5]},
+            "vlek_supported": {"const": false}
+          }
+        },
+        "report_version": {"type": "integer", "enum": [3, 4, 5]},
+        "vmpl": {"const": 0},
+        "policy": {
+          "type": "object", "additionalProperties": false,
+          "required": ["debug_allowed", "migrate_ma_allowed", "smt_allowed", "guest_abi_major", "guest_abi_minor", "guest_policy"],
+          "properties": {
+            "debug_allowed": {"const": false},
+            "migrate_ma_allowed": {"const": false},
+            "smt_allowed": {"const": true},
+            "guest_abi_major": {"const": 0},
+            "guest_abi_minor": {"const": 0},
+            "guest_policy": {"type": "string", "pattern": "^0x[0-9a-f]{16}$"}
+          }
+        },
+        "tcb": {
+          "type": "object", "additionalProperties": false,
+          "required": ["source", "bootloader", "tee", "snp", "microcode"],
+          "properties": {
+            "source": {"type": "string", "format": "uri"},
+            "bootloader": {"type": "integer", "minimum": 0},
+            "tee": {"type": "integer", "minimum": 0},
+            "snp": {"type": "integer", "minimum": 0},
+            "microcode": {"type": "integer", "minimum": 0}
+          }
+        },
+        "guest": {
+          "type": "object", "additionalProperties": false,
+          "required": ["kata_version", "kata_commit", "firmware_sha256", "kernel_sha256", "effective_vcpus", "cpu_family", "kernel_cmdline_sha256", "composition_ref", "agent_policy_ref", "exec_process_allowed"],
+          "properties": {
+            "kata_version": {"type": "string", "minLength": 1},
+            "kata_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+            "firmware_sha256": {"$ref": "#/$defs/sha256Name"},
+            "kernel_sha256": {"$ref": "#/$defs/sha256Name"},
+            "effective_vcpus": {"type": "integer", "minimum": 1},
+            "cpu_family": {"const": "EPYC-v4"},
+            "kernel_cmdline_sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+            "composition_ref": {"type": "string", "format": "uri"},
+            "agent_policy_ref": {"type": "string", "format": "uri"},
+            "exec_process_allowed": {"const": false}
+          }
+        },
+        "images": {
+          "type": "object", "additionalProperties": false,
+          "required": ["litellm", "fetch-secrets"],
+          "properties": {
+            "litellm": {"$ref": "#/$defs/ociReference"},
+            "fetch-secrets": {"$ref": "#/$defs/ociReference"}
+          }
+        },
+        "ear": {
+          "type": "object", "additionalProperties": false,
+          "required": ["verifier", "version", "instance_nonce_required"],
+          "properties": {
+            "verifier": {"const": "CoCo Trustee"},
+            "version": {"const": "v0.23.0"},
+            "instance_nonce_required": {"const": true}
+          }
+        }
+      }
+    },
+    "attestation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["endpoint", "header", "tls_domain", "nonce_required", "fresh_certificate_per_boot", "all_replicas_verified"],
+      "properties": {
+        "endpoint": {"const": "https://llm.kubetee.ai/v1/attestation"},
+        "header": {"const": "X-KubeTEE-Nonce"},
+        "tls_domain": {"const": "llm.kubetee.ai"},
+        "nonce_required": {"const": true},
+        "fresh_certificate_per_boot": {"const": true},
+        "all_replicas_verified": {"const": true},
+        "observed_pod_identities": {"$ref": "#/$defs/observedPods"}
+      }
+    },
+    "signature": {
+      "type": "object", "additionalProperties": false,
+      "required": ["alg", "key_id", "canonicalization", "sig"],
+      "properties": {
+        "alg": {"const": "ed25519"},
+        "key_id": {"type": "string", "pattern": "^kubetee-measurements-[A-Za-z0-9_-]+$"},
+        "canonicalization": {"const": "RFC8785-without-signature-member"},
+        "sig": {"type": "string", "pattern": "^[A-Za-z0-9_-]+={0,2}$"}
+      }
+    }
+  },
+  "$defs": {
+    "sha256Name": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "sha384": {"type": "string", "pattern": "^[0-9a-f]{96}$"},
+    "ociReference": {"type": "string", "pattern": "^ghcr\\.io/kubetee-ai/litellm-database:[A-Za-z0-9._+-]+@sha256:[0-9a-f]{64}$"},
+    "observedPods": {
+      "type": "object", "minProperties": 1, "additionalProperties": false,
+      "patternProperties": {
+        "^[0-9a-z][0-9a-z.-]+$": {
+          "type": "object", "additionalProperties": false,
+          "required": ["verified_at", "reference", "signature_checked"],
+          "properties": {
+            "verified_at": {"type": "string", "format": "date-time"},
+            "reference": {"type": "string", "format": "uri"},
+            "signature_checked": {"const": true}
+          }
+        }
+      }
+    }
+  }
+}

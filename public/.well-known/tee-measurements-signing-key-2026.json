@@ -1,0 +1,13 @@
+{
+  "schema": "kubetee.tee-measurements-signing-key/1",
+  "key_id": "kubetee-measurements-2026-11-22",
+  "algorithm": "Ed25519",
+  "signature_canonicalization": "RFC8785 JCS of the registry without its signature member",
+  "public_key": {
+    "kty": "OKP",
+    "crv": "Ed25519",
+    "x": "Pwsnmck0Yb5WnKrhXpnTdu3jEVIWNVlQ4JWyME8ZORw"
+  },
+  "spki_der_base64url": "MCowBQYDK2VwAyEAPwsnmck0Yb5WnKrhXpnTdu3jEVIWNVlQ4JWyME8ZORw",
+  "spki_sha256": "sha256:27548e44c2a068ea30e46380d1347fc5a80c0c6821fc06688e9c883a8de145af"
+}
