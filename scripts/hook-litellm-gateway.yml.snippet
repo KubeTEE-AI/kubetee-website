@@ -34,8 +34,10 @@
   measure-sign-publish:
     # Only on a real publish (kubetee-prod, not a PR), and only once the evidence
     # host + signing secrets are configured -- otherwise SKIP (not fail) so builds
-    # stay green until the attestation secrets/vars are set.
-    if: ${{ env.PUBLISH == 'true' && vars.SNP_GUEST_HOST != '' }}
+    # stay green until the attestation secrets/vars are set. NOTE: use the
+    # workflow-level publish expression (env.PUBLISH is job-scoped and NOT visible
+    # to another job's `if`).
+    if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/kubetee-prod' && vars.SNP_GUEST_HOST != '' }}
     needs: [build-and-push]
     uses: KubeTEE-AI/kubetee-website/.github/workflows/measure-sign-publish.yml@main
     with:

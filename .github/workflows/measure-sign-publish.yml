@@ -41,6 +41,7 @@ on:
     secrets:
       TEE_MEASUREMENTS_SIGNING_KEY: { required: false }
       WEBSITE_REPO_TOKEN:           { required: false }
+      EASTWEST_CLIENT_CA:           { required: false }
       EASTWEST_CLIENT_CERT:         { required: false }
       EASTWEST_CLIENT_KEY:          { required: false }
   # Manual post-deploy fallback: run this once a human/Fleet deploy of image_ref is
@@ -58,7 +59,34 @@ permissions:
   contents: read
 
 jobs:
+  # Gate: only run once the signing key + website token are configured. The signing
+  # key is offline-custodied (`kubetee-measurements-2026-11-22`); until it is added as
+  # `TEE_MEASUREMENTS_SIGNING_KEY` this job SKIPS (green) rather than failing, and the
+  # pipeline auto-activates the moment it lands. A generated-but-unsigned record is a
+  # draft, never evidence -- the publisher also refuses to emit one (`--require-signature`).
+  preflight:
+    runs-on: ubuntu-latest
+    outputs:
+      ready: ${{ steps.check.outputs.ready }}
+    steps:
+      - id: check
+        name: Check attestation secrets are configured
+        env:
+          SIGNING_KEY: ${{ secrets.TEE_MEASUREMENTS_SIGNING_KEY }}
+          WEBSITE_TOKEN: ${{ secrets.WEBSITE_REPO_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SIGNING_KEY}" ] || [ -z "${WEBSITE_TOKEN}" ]; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::measure-sign-publish SKIPPED: set secrets TEE_MEASUREMENTS_SIGNING_KEY (offline Ed25519 PEM, key_id kubetee-measurements-2026-11-22) and WEBSITE_REPO_TOKEN (contents:write on KubeTEE-AI/kubetee-website) to activate automatic measure/sign/publish."
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+            echo "attestation secrets present; proceeding to measure/sign/publish"
+          fi
+
   measure-sign-publish:
+    needs: preflight
+    if: needs.preflight.outputs.ready == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout publisher (kubetee-website)
@@ -85,6 +113,7 @@ jobs:
           TEE: ${{ inputs.tee }}
           GUEST_HOST: ${{ inputs.guest_host }}
           EVIDENCE_PATH: ${{ inputs.evidence_path }}
+          EASTWEST_CLIENT_CA: ${{ secrets.EASTWEST_CLIENT_CA }}
           EASTWEST_CLIENT_CERT: ${{ secrets.EASTWEST_CLIENT_CERT }}
           EASTWEST_CLIENT_KEY: ${{ secrets.EASTWEST_CLIENT_KEY }}
           IMAGE_REF: ${{ inputs.image_ref }}
@@ -108,7 +137,8 @@ jobs:
             if [ "$TEE" = "snp" ] || [ -z "${EASTWEST_CLIENT_CERT}" ]; then
               CURL=(curl -fsS --cacert /etc/ssl/certs/ca-certificates.crt)
             else
-              CURL=(curl -fsS --cert <(printf '%s' "$EASTWEST_CLIENT_CERT") --key <(printf '%s' "$EASTWEST_CLIENT_KEY") --cacert /etc/ssl/certs/ca-certificates.crt)
+              printf '%s' "$EASTWEST_CLIENT_CA" > /tmp/ew-ca.pem
+              CURL=(curl -fsS --cacert /tmp/ew-ca.pem --cert <(printf '%s' "$EASTWEST_CLIENT_CERT") --key <(printf '%s' "$EASTWEST_CLIENT_KEY"))
             fi
             if "${CURL[@]}" "$URL" -o evidence.json 2>/dev/null && python3 -c 'import json,sys; json.load(open("evidence.json"))' 2>/dev/null; then
               echo "captured live evidence envelope for ${IMAGE_REF} on attempt ${attempt}"
