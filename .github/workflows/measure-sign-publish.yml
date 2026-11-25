@@ -20,9 +20,20 @@
 #   evidence_path  `/kubetee/evidence` (tdx) or `/v1/attestation` (snp)
 #
 # Secrets (caller must pass through):
-#   TEE_MEASUREMENTS_SIGNING_KEY   offline Ed25519 PEM (key_id kubetee-measurements-2026-11-22)
+#   TEE_MEASUREMENTS_SIGNING_KEY   Ed25519 PEM (key_id kubetee-measurements-2026-11-25).
+#                                  CUSTODY: an environment secret on the
+#                                  `measurements-signing` environment (required reviewer +
+#                                  deployment-branch policy), never a plain repo secret.
+#                                  For a cross-repo call the env is resolved in the CALLER
+#                                  repo (see `environment:` on the signing job below).
 #   WEBSITE_REPO_TOKEN             repo-scoped token to push to KubeTEE-AI/kubetee-website@main
 #   EASTWEST_CLIENT_CERT / _KEY    (tdx) gateway east-west identity to fetch evidence over mTLS
+#
+# Release switch: the signing job only starts when the repo variable
+#   ATTESTATION_SIGNING_ENABLED == 'true'  (set it AFTER the signing key is placed in
+#   the `measurements-signing` environment). Off -> this stage SKIPS green, nothing
+#   publishes unsigned. On -> the `measurements-signing` review gate must be approved
+#   to release the key per run.
 #
 # Everything is GH-hosted + GH Actions only (`.cursor/rules/gh-only-image-builds.mdc`);
 # no cluster node is used to build or sign.
@@ -60,11 +71,15 @@ permissions:
 
 jobs:
   # Gate: only run once the signing key + website token are configured. The signing
-  # key is offline-custodied (`kubetee-measurements-2026-11-22`); until it is added as
+  # key is offline-custodied (`kubetee-measurements-2026-11-25`); until it is added as
   # `TEE_MEASUREMENTS_SIGNING_KEY` this job SKIPS (green) rather than failing, and the
   # pipeline auto-activates the moment it lands. A generated-but-unsigned record is a
   # draft, never evidence -- the publisher also refuses to emit one (`--require-signature`).
   preflight:
+    # Master switch. Keep `ATTESTATION_SIGNING_ENABLED=false` until the offline Ed25519
+    # signing key is placed in the `measurements-signing` environment; then flip to `true`
+    # to activate measure->sign->publish (with the per-run reviewer release below).
+    if: vars.ATTESTATION_SIGNING_ENABLED == 'true'
     runs-on: ubuntu-latest
     outputs:
       ready: ${{ steps.check.outputs.ready }}
@@ -78,7 +93,7 @@ jobs:
           set -euo pipefail
           if [ -z "${SIGNING_KEY}" ] || [ -z "${WEBSITE_TOKEN}" ]; then
             echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::measure-sign-publish SKIPPED: set secrets TEE_MEASUREMENTS_SIGNING_KEY (offline Ed25519 PEM, key_id kubetee-measurements-2026-11-22) and WEBSITE_REPO_TOKEN (contents:write on KubeTEE-AI/kubetee-website) to activate automatic measure/sign/publish."
+            echo "::notice::measure-sign-publish SKIPPED: set secrets TEE_MEASUREMENTS_SIGNING_KEY (offline Ed25519 PEM, key_id kubetee-measurements-2026-11-25) and WEBSITE_REPO_TOKEN (contents:write on KubeTEE-AI/kubetee-website) to activate automatic measure/sign/publish."
           else
             echo "ready=true" >> "$GITHUB_OUTPUT"
             echo "attestation secrets present; proceeding to measure/sign/publish"
@@ -87,6 +102,13 @@ jobs:
   measure-sign-publish:
     needs: preflight
     if: needs.preflight.outputs.ready == 'true'
+    # Release point for the signing key. `environment:` MUST live here (on the job inside
+    # this reusable workflow) -- a job that CALLS this workflow cannot use `environment`.
+    # On a cross-repo call the `measurements-signing` env (and its
+    # TEE_MEASUREMENTS_SIGNING_KEY secret) is resolved in the CALLER's repo; the required
+    # reviewer + deployment-branch policy then gate the key release per run. This job must
+    # run at most once per build (the callers use concurrency: cancel-in-progress:false).
+    environment: measurements-signing
     runs-on: ubuntu-latest
     steps:
       - name: Checkout publisher (kubetee-website)

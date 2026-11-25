@@ -1,0 +1,62 @@
+{
+  "schema": "kubetee.tee-reference-values/1",
+  "version": 1,
+  "status": "active",
+  "key_id": "kubetee-measurements-2026-11-25",
+  "corim": {
+    "encoding": "application/corim-cbor+diagnostic; canonical CBOR (RFC 8949)",
+    "outer_tag": 501,
+    "comid_tag": 506,
+    "digest_alg": "sha384",
+    "sha256": "f619409d7d4c913d0dc2454e18282536d1a47c4a0bd7b14d5b2bcfc354090794",
+    "bytes": 555,
+    "signature": {
+      "alg": "ed25519",
+      "key_id": "kubetee-measurements-2026-11-25",
+      "sig": "XE+JY3Z+jS+JXtMSmpArmDel8eHA72+djJf3ErLbYXVLe+fiKMF//RAzzfZeXFDWyxe7T8FlgRQ0yTmG7UveBg=="
+    },
+    "signature_note": "Detached Ed25519 over the raw CBOR bytes (sign offline with key_id kubetee-measurements-2026-11-25 via scripts/build-tee-reference-values-corim.py --key <offline-key.pem>; the private half never enters the cluster or Git). Trustee v0.23.0's RVPS CoRIM extractor does not verify CoRIM signatures, so this is a publication integrity artifact (same key/key_id as tee-measurements-sglang.tdx.json), not a Trustee-enforced input."
+  },
+  "target_environment": {
+    "class": {
+      "vendor": "kubetee",
+      "model": "sglang-kimi-k3-1-pro"
+    }
+  },
+  "reference_values": [
+    {
+      "uri": "kubetee/sglang-kimi-k3-1-pro/mr_td/digests",
+      "register": "mr_td",
+      "value": "382d7bb61e152a5cc6eb22922a4dc9d33025211e24ec199fe38d6233c39cd86bf633e3c4f6e62393cf7ce6da91069ca0"
+    },
+    {
+      "uri": "kubetee/sglang-kimi-k3-1-pro/rtmr_0/digests",
+      "register": "rtmr_0",
+      "value": "14f01287aefb3ac196451163aa8cf68cc1635083b24eb317256288815a5b48bbe7cdf2e2395ebf0474b3e528d2004014"
+    },
+    {
+      "uri": "kubetee/sglang-kimi-k3-1-pro/rtmr_1/digests",
+      "register": "rtmr_1",
+      "value": "97fa8ac275f656b876de7c68709608bfe6ace60b58a3b8fb6e990c15bd8711ce8807ed86956f39b62afb9a9daee80227"
+    },
+    {
+      "uri": "kubetee/sglang-kimi-k3-1-pro/rtmr_2/digests",
+      "register": "rtmr_2",
+      "value": "77903a48ffcc66809d3f01a9853186ac08bc0081d06e4d05a0e0307450188e08d9f21b9c77e6747df0a90e65d7e3bff9"
+    },
+    {
+      "uri": "kubetee/sglang-kimi-k3-1-pro/rtmr_3/digests",
+      "register": "rtmr_3",
+      "value": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "uri": "kubetee/sglang-kimi-k3-1-pro/mr_config_id/digests",
+      "register": "mr_config_id",
+      "value": "0484a58e5927efd31bf871c74bcc9f1768f4335bb92340176989b3c5b320f9341d772b9e3e9c4fe4d824613cc19e6e0b"
+    }
+  ],
+  "rvps": {
+    "ingest": "RVPS RegisterReferenceValue with a JSON Message {\"version\":\"0.1.0\",\"type\":\"corim\",\"payload\":\"<base64-STANDARD CBOR>\"} (Trustee v0.23.0 rvps/src/lib.rs Message + extractors/corim).",
+    "note": "Namespaced URIs are inert to the stock default_cpu attestation policy (which queries bare mr_td/rtmr_1/rtmr_2/xfam). Only a policy that explicitly queries these kubetee/<model>/<register>/digests URIs appraises against them."
+  }
+}

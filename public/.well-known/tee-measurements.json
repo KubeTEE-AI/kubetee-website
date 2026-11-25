@@ -6,7 +6,7 @@
   "runtime_class": "kata-qemu-snp-runtime-rs",
   "status": "active",
   "not_before": "2026-11-22T06:10:00Z",
-  "key_id": "kubetee-measurements-2026-11-22",
+  "key_id": "kubetee-measurements-2026-11-25",
   "key_url": "https://kubetee.ai/.well-known/tee-measurements-signing-key-2026.json",
   "subject": "litellm-database",
   "provenance": {
@@ -128,8 +128,8 @@
   },
   "signature": {
     "alg": "ed25519",
-    "key_id": "kubetee-measurements-2026-11-22",
+    "key_id": "kubetee-measurements-2026-11-25",
     "canonicalization": "RFC8785-without-signature-member",
-    "sig": "5YHZmOh9PwPm1ragrVzmlwKC0tbEZ5j17NK7g2_boN0VJcMhmqhyOLkI3sjqw7jKMfWqKJAl9boRJ4mWNY_PCQ"
+    "sig": "EjEDURXcQnkqYLTliOeNnzT9o7y2Qez-3UBjIpFukZjQA7gjH5St6P-0gqCj7JVHpjl4HwP-OyY39mpuJMBXCA"
   }
 }

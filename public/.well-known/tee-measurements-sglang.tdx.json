@@ -3,7 +3,7 @@
   "version": 1,
   "status": "active",
   "not_before": "2026-11-24T00:00:00Z",
-  "key_id": "kubetee-measurements-2026-11-22",
+  "key_id": "kubetee-measurements-2026-11-25",
   "measurements": {
     "mrtd": "hex:382d7bb61e152a5cc6eb22922a4dc9d33025211e24ec199fe38d6233c39cd86bf633e3c4f6e62393cf7ce6da91069ca0",
     "rtmr0": "hex:14f01287aefb3ac196451163aa8cf68cc1635083b24eb317256288815a5b48bbe7cdf2e2395ebf0474b3e528d2004014",
@@ -36,14 +36,14 @@
       "T15/T16 (#13665/#13746 missing-task VM stop)"
     ],
     "shim_dropped_fixes": [
-      "fix16 (#13641 inotify) — consciously dropped",
-      "fix9-12 orphan reaper — consciously dropped"
+      "fix16 (#13641 inotify) \u2014 consciously dropped",
+      "fix9-12 orphan reaper \u2014 consciously dropped"
     ],
     "nvidia_guest_driver": "615.71.09"
   },
   "signature": {
     "alg": "ed25519",
-    "key_id": "kubetee-measurements-2026-11-22",
-    "sig": "UBgRAJ3ipE3j30unE0jEDq+vDQzprr4ivFMZESf9Bc5WRZDXbOjLHtLMa9mTggUhRxQbWKKUhFm52aKmrSW3BQ=="
+    "key_id": "kubetee-measurements-2026-11-25",
+    "sig": "iiwAvcml1hdzYI2BYmWyJVS1jwVKc3ECUazWvxpsbYViDO2h1tblNPazzsyXpah8QdS5AWOikvM-9Lnc1MjqCA"
   }
 }

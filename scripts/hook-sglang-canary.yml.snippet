@@ -19,11 +19,23 @@
 # Registers (MRTD/RTMR0-3/MRCONFIGID) are launch-config-derived (shared across nodes +
 # lineages); a new image adds provenance + a live verification, not new registers.
 #
-# Repository secrets (Settings -> Secrets -> Actions), created ONCE:
-#   TEE_MEASUREMENTS_SIGNING_KEY   Ed25519 PEM (key_id kubetee-measurements-2026-11-22)
-#   WEBSITE_REPO_TOKEN             PAT with contents:write on KubeTEE-AI/kubetee-website
-#   EASTWEST_CLIENT_CERT / _KEY    gateway east-west identity (mTLS fetch of /kubetee/evidence)
-# Variable (Settings -> Variables): TDX_GUEST_HOST = evidence host of a deployed guest.
+# Secrets / variables, created ONCE:
+#   TEE_MEASUREMENTS_SIGNING_KEY   Ed25519 PEM (key_id kubetee-measurements-2026-11-25).
+#                                  CUSTODY: an ENVIRONMENT secret on `measurements-signing`
+#                                  (required reviewer + deployment-branch policy) --
+#                                  NOT a plain repo secret. The called workflow releases it
+#                                  via `environment: measurements-signing`, resolved in THIS
+#                                  (caller) repo for a cross-repo call. The private half is
+#                                  offline in operator custody; place it with:
+#                                    gh secret set TEE_MEASUREMENTS_SIGNING_KEY \
+#                                      --env measurements-signing -R KubeTEE-AI/sglang
+#   WEBSITE_REPO_TOKEN             repo secret -- PAT with contents:write on KubeTEE-AI/kubetee-website
+#   EASTWEST_CLIENT_CERT / _KEY    repo secret -- gateway east-west identity (mTLS fetch of /kubetee/evidence)
+# Variable (Settings -> Variables):
+#   TDX_GUEST_HOST                 evidence host of a deployed guest.
+#   ATTESTATION_SIGNING_ENABLED    'true' to enable measure->sign->publish; 'false' skips it
+#                                  (green) and publishes NOTHING unsigned. Set 'true' only
+#                                  after the signing key is placed in `measurements-signing`.
 
   measure-sign-publish:
     # Only on a real publish (the canary branch, not a PR / fork), and only once

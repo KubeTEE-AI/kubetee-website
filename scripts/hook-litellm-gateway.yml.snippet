@@ -26,10 +26,22 @@
 #     `GET https://llm.kubetee.ai/v1/attestation` goes live on deploy, so clients can
 #     validate immediately (the requirement).
 #
-# Repository secrets (created ONCE):
-#   TEE_MEASUREMENTS_SIGNING_KEY   Ed25519 PEM (key_id kubetee-measurements-2026-11-22)
-#   WEBSITE_REPO_TOKEN             PAT with contents:write on KubeTEE-AI/kubetee-website
-# Variable: SNP_GUEST_HOST = evidence host of a deployed gateway guest of THIS image.
+# Secrets / variables, created ONCE:
+#   TEE_MEASUREMENTS_SIGNING_KEY   Ed25519 PEM (key_id kubetee-measurements-2026-11-25).
+#                                  CUSTODY: an ENVIRONMENT secret on `measurements-signing`
+#                                  (required reviewer + deployment-branch policy) --
+#                                  NOT a plain repo secret. The called workflow releases it
+#                                  via `environment: measurements-signing`, resolved in THIS
+#                                  (caller) repo for a cross-repo call. The private half is
+#                                  offline in operator custody; place it with:
+#                                    gh secret set TEE_MEASUREMENTS_SIGNING_KEY \
+#                                      --env measurements-signing -R KubeTEE-AI/litellm
+#   WEBSITE_REPO_TOKEN             repo secret -- PAT with contents:write on KubeTEE-AI/kubetee-website
+# Variable:
+#   SNP_GUEST_HOST                 evidence host of a deployed gateway guest of THIS image.
+#   ATTESTATION_SIGNING_ENABLED    'true' to enable measure->sign->publish; 'false' skips it
+#                                  (green) and publishes NOTHING unsigned. Set 'true' only
+#                                  after the signing key is placed in `measurements-signing`.
 
   measure-sign-publish:
     # Only on a real publish (kubetee-prod, not a PR), and only once the evidence

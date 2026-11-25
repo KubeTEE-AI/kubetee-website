@@ -18,7 +18,7 @@ For each new image it:
   3. SIGNS      - RFC 8785 (JCS) over the record with the `signature` member
                   removed, Ed25519 with the CI signing key
                   (`secrets.TEE_MEASUREMENTS_SIGNING_KEY` = PEM, key_id
-                  `kubetee-measurements-2026-11-22`). A generated-but-unsigned
+                  `kubetee-measurements-2026-11-25`). A generated-but-unsigned
                   record is a DRAFT, never evidence.
   4. PUBLISHES  - writes `.well-known/tee-measurements*.{json,cbor,...}` and the
                   derived RVPS CoRIM. CI commits to `kubetee-website@main`; GH
@@ -51,7 +51,7 @@ try:
 except ImportError:  # pragma: no cover
     sys.exit("needs cbor2:  python3 -m pip install cbor2")
 
-KEY_ID = "kubetee-measurements-2026-11-22"
+KEY_ID = "kubetee-measurements-2026-11-25"
 SHA384_ALG = 7  # corim-rs HashAlgorithm::Sha384 -> to_u8() == 7
 TDINFO_OFFSET = 184  # 48-byte TDX quote v4 header + 136-byte report body
 REPORT_DATA_OFFSET = TDINFO_OFFSET + 384  # TDINFO field order (validated)
