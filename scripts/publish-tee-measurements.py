@@ -107,9 +107,22 @@ def jcs(obj) -> bytes:
 
 
 def verify_report_data_binding(envelope: dict) -> None:
-    """report_data MUST equal sha256(JCS(report_data_statement)) || 32 zero bytes."""
-    stmt = envelope.get("report_data_statement") or ""
-    rd = _b64d(envelope["report_data"])
+    """report_data MUST equal sha256(JCS(statement)) || 32 zero bytes
+    (`kubetee.attestation.v1`). TDX (epoch form) carries `report_data` +
+    `report_data_statement` at top level; SNP carries the statement under
+    `bindings.report_data_statement` and the 64-byte value under `evidence`.
+    Locate whichever shape is present and check the binding; fail closed."""
+    stmt = (envelope.get("report_data_statement")
+            or (envelope.get("bindings") or {}).get("report_data_statement"))
+    if not stmt:
+        raise SystemExit("no report_data_statement in envelope -- refusing")
+    # Find the 64-byte report_data wherever this envelope shape puts it.
+    rd_b64 = (envelope.get("report_data") or ""
+              or (envelope.get("evidence") or {}).get("quote_report_data") or ""
+              or (envelope.get("evidence") or {}).get("report_data") or "")
+    if not rd_b64:
+        raise SystemExit("no report_data in envelope -- refusing")
+    rd = _b64d(rd_b64)
     expected = hashlib.sha256(stmt.encode()).digest() + bytes(32)
     if rd != expected:
         raise SystemExit("report_data does not bind sha256(statement)||0^32 -- refusing")

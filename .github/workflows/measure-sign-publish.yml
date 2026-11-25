@@ -82,6 +82,7 @@ jobs:
       #    exact image digest that minted the quote.
       - name: Capture live evidence envelope (poll for deployed guest of image_ref)
         env:
+          TEE: ${{ inputs.tee }}
           GUEST_HOST: ${{ inputs.guest_host }}
           EVIDENCE_PATH: ${{ inputs.evidence_path }}
           EASTWEST_CLIENT_CERT: ${{ secrets.EASTWEST_CLIENT_CERT }}
@@ -91,14 +92,23 @@ jobs:
           set -euo pipefail
           DEADLINE=$(( $(date +%s) + ${POLL_TIMEOUT_SECONDS:-7200} ))   # default 2h (large CC guest boot)
           attempt=0
+          build_url() {
+            if [ "$TEE" = "snp" ]; then
+              # SNP gateway: public :443, nonce as a query param.
+              NONCE=$(openssl rand -hex 32)
+              printf 'https://%s%s?nonce=%s' "$GUEST_HOST" "$EVIDENCE_PATH" "$NONCE"
+            else
+              # TDX backend: strict-mTLS :8443, epoch-form capture (role-scoped, no nonce).
+              printf 'https://%s:8443%s?role=nim-terminator' "$GUEST_HOST" "$EVIDENCE_PATH"
+            fi
+          }
           while :; do
             attempt=$((attempt + 1))
-            NONCE=$(openssl rand -hex 32)
-            URL="https://${GUEST_HOST}:8443${EVIDENCE_PATH}?role=nim-terminator&nonce=${NONCE}"
-            if [ -n "${EASTWEST_CLIENT_CERT}" ]; then
-              CURL=(curl -fsS --cert <(printf '%s' "$EASTWEST_CLIENT_CERT") --key <(printf '%s' "$EASTWEST_CLIENT_KEY") --cacert /etc/ssl/certs/ca-certificates.crt)
-            else
+            URL="$(build_url)"
+            if [ "$TEE" = "snp" ] || [ -z "${EASTWEST_CLIENT_CERT}" ]; then
               CURL=(curl -fsS --cacert /etc/ssl/certs/ca-certificates.crt)
+            else
+              CURL=(curl -fsS --cert <(printf '%s' "$EASTWEST_CLIENT_CERT") --key <(printf '%s' "$EASTWEST_CLIENT_KEY") --cacert /etc/ssl/certs/ca-certificates.crt)
             fi
             if "${CURL[@]}" "$URL" -o evidence.json 2>/dev/null && python3 -c 'import json,sys; json.load(open("evidence.json"))' 2>/dev/null; then
               echo "captured live evidence envelope for ${IMAGE_REF} on attempt ${attempt}"
