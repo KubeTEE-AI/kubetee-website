@@ -1,0 +1,49 @@
+{
+  "schema": "kubetee.tee-measurements/1",
+  "version": 1,
+  "status": "active",
+  "not_before": "2026-11-24T00:00:00Z",
+  "key_id": "kubetee-measurements-2026-11-22",
+  "measurements": {
+    "mrtd": "hex:382d7bb61e152a5cc6eb22922a4dc9d33025211e24ec199fe38d6233c39cd86bf633e3c4f6e62393cf7ce6da91069ca0",
+    "rtmr0": "hex:14f01287aefb3ac196451163aa8cf68cc1635083b24eb317256288815a5b48bbe7cdf2e2395ebf0474b3e528d2004014",
+    "rtmr1": "hex:97fa8ac275f656b876de7c68709608bfe6ace60b58a3b8fb6e990c15bd8711ce8807ed86956f39b62afb9a9daee80227",
+    "rtmr2": "hex:77903a48ffcc66809d3f01a9853186ac08bc0081d06e4d05a0e0307450188e08d9f21b9c77e6747df0a90e65d7e3bff9",
+    "rtmr3": "hex:000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "mrconfigid": "hex:0484a58e5927efd31bf871c74bcc9f1768f4335bb92340176989b3c5b320f9341d772b9e3e9c4fe4d824613cc19e6e0b"
+  },
+  "initdata": {
+    "sha384": "hex:0484a58e5927efd31bf871c74bcc9f1768f4335bb92340176989b3c5b320f9341d772b9e3e9c4fe4d824613cc19e6e0b",
+    "algorithm": "sha384",
+    "files": {
+      "aa.toml": "token_configs.kbs.url = https://kbs.kubetee.ai",
+      "cdh.toml": "kbc.name = cc_kbc, kbc.url = https://kbs.kubetee.ai",
+      "policy.rego": "agent_policy defaults; ExecProcessRequest=false, WriteStreamRequest=false, ReadStreamRequest=true"
+    }
+  },
+  "guest": {
+    "kata_version": "4.4.0",
+    "kata_commit": "f9cbda4d235b345340bf461e4aaba8c89e841d8d",
+    "kata_deploy_chart": "4.4.0+kubetee.1",
+    "ovmf_version": "edk2-stable202608",
+    "ovmf_fd_sha256": "hex:2a2dc2710b0cfafc813310c7e98c67b72b919b8e1572d52a4c79466a2e499226",
+    "ovmf_note": "in-tree lazy-accept OVMF.inteltdx.fd (edk2-stable202608); CAPTURED 2026-11-24 on lu-b300-39 at the exact -bios path this guest launches from (/opt/kata/share/ovmf/OVMF.inteltdx.fd). Matches the lazy-accept pin.",
+    "shim_sha256": "hex:82cd97b52ac89b6a73871d5ca68b61f840c5d84e030f28b72dc03f9baab9a73a",
+    "shim_note": "/opt/kata/runtime-rs/bin/containerd-shim-kata-v2, overlay v4.4.0-fix11649-t15t16-vsocktimeout (branch kubetee-fix11649-t15t16-440)",
+    "shim_overlay_image": "ghcr.io/kubetee-ai/kata-deploy-shim-overlay:v4.4.0-fix11649-t15t16-vsocktimeout@sha256:a8699a8705d95d2287685b59321e70a326cfdb19a54345524edadd6b3635e10c",
+    "shim_carried_fixes": [
+      "fix15 (#11649 idempotent block hotplug + stale-fdset reclaim)",
+      "T15/T16 (#13665/#13746 missing-task VM stop)"
+    ],
+    "shim_dropped_fixes": [
+      "fix16 (#13641 inotify) — consciously dropped",
+      "fix9-12 orphan reaper — consciously dropped"
+    ],
+    "nvidia_guest_driver": "615.71.09"
+  },
+  "signature": {
+    "alg": "ed25519",
+    "key_id": "kubetee-measurements-2026-11-22",
+    "sig": "UBgRAJ3ipE3j30unE0jEDq+vDQzprr4ivFMZESf9Bc5WRZDXbOjLHtLMa9mTggUhRxQbWKKUhFm52aKmrSW3BQ=="
+  }
+}
