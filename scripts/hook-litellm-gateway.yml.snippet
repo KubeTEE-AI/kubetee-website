@@ -1,0 +1,51 @@
+# === KubeTEE attestation automation (measure -> sign -> publish) for the LiteLLM gateway ===
+# DROP-IN for `.github/workflows/build-litellm-overlay.yaml` on `KubeTEE-AI/litellm`.
+# NOTE: `kubetee-prod` is PR-required + `enforce_admins: true`, so apply via a PR
+# (cannot direct-push even as admin). Two additions:
+#
+# (A) In the EXISTING `build-and-push:` job:
+#     1. Give the `Record and sign immutable digest` step an id and write the full
+#        `image_ref` to `$GITHUB_OUTPUT` (it already sets `$GITHUB_ENV`). Change:
+#
+#          - name: Record and sign immutable digest
+#            id: record
+#            if: ${{ env.PUBLISH == 'true' }}
+#            run: |
+#              IMAGE_DIGEST=$(python3 -c 'import json; print(json.load(open("/tmp/kubetee-image-metadata.json"))["containerimage.digest"])')
+#              echo "IMAGE_REF=${REGISTRY}/${IMAGE_NAME}@${IMAGE_DIGEST}" >> "$GITHUB_ENV"
+#              echo "image_ref=${REGISTRY}/${IMAGE_NAME}@${IMAGE_DIGEST}" >> "$GITHUB_OUTPUT"   # <-- add
+#              ...
+#     2. Add an `outputs:` block under `build-and-push:`:
+#
+#          outputs:
+#            image_ref: ${{ steps.record.outputs.image_ref }}
+#
+# (B) Append this job at the end of `jobs:`. It chains the shared publisher in
+#     `KubeTEE-AI/kubetee-website` so every new gateway image is measured, signed and
+#     published automatically -- the SNP reference backing the client-facing
+#     `GET https://llm.kubetee.ai/v1/attestation` goes live on deploy, so clients can
+#     validate immediately (the requirement).
+#
+# Repository secrets (created ONCE):
+#   TEE_MEASUREMENTS_SIGNING_KEY   Ed25519 PEM (key_id kubetee-measurements-2026-11-22)
+#   WEBSITE_REPO_TOKEN             PAT with contents:write on KubeTEE-AI/kubetee-website
+# Variable: SNP_GUEST_HOST = evidence host of a deployed gateway guest of THIS image.
+
+  measure-sign-publish:
+    # Only on a real publish (kubetee-prod, not a PR), and only once the evidence
+    # host + signing secrets are configured -- otherwise SKIP (not fail) so builds
+    # stay green until the attestation secrets/vars are set.
+    if: ${{ env.PUBLISH == 'true' && vars.SNP_GUEST_HOST != '' }}
+    needs: [build-and-push]
+    uses: KubeTEE-AI/kubetee-website/.github/workflows/measure-sign-publish.yml@main
+    with:
+      image_ref: ${{ needs.build-and-push.outputs.image_ref }}
+      tee: snp
+      model: litellm-gateway
+      guest_host: ${{ vars.SNP_GUEST_HOST }}
+      evidence_path: /v1/attestation
+      json_name: tee-measurements.json
+    secrets:
+      TEE_MEASUREMENTS_SIGNING_KEY: ${{ secrets.TEE_MEASUREMENTS_SIGNING_KEY }}
+      WEBSITE_REPO_TOKEN: ${{ secrets.WEBSITE_REPO_TOKEN }}
+# === end KubeTEE attestation automation hook ===

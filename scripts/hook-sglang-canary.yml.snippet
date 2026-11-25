@@ -1,0 +1,47 @@
+# === KubeTEE attestation automation (measure -> sign -> publish) for SGLang `kimi-k3.1-pro` ===
+# DROP-IN for `.github/workflows/build-kimi-k31-granian-canary.yml` on
+# `KubeTEE-AI/sglang` (branch `kubetee/kimi-k31-granian-mtls-day0`). Applies to this
+# canary AND the `v0.5.23` / `nightly` lineages (they share the same two-step shape).
+# Two additions:
+#
+# (A) In the EXISTING `build:` job, add an `outputs:` block so the immutable digest
+#     reaches the publisher. (The `resolve` step already writes `digest` to
+#     `$GITHUB_OUTPUT`.) Add right under `build:`:
+#
+#       outputs:
+#         digest: ${{ steps.resolve.outputs.digest }}
+#
+# (B) Append this job at the end of `jobs:`. It chains the shared publisher in
+#     `KubeTEE-AI/kubetee-website` so every new image is measured, signed and
+#     published automatically once deployed -- the reference is live before the image
+#     serves traffic, so clients can validate `GET /v1/attestation`.
+#
+# Registers (MRTD/RTMR0-3/MRCONFIGID) are launch-config-derived (shared across nodes +
+# lineages); a new image adds provenance + a live verification, not new registers.
+#
+# Repository secrets (Settings -> Secrets -> Actions), created ONCE:
+#   TEE_MEASUREMENTS_SIGNING_KEY   Ed25519 PEM (key_id kubetee-measurements-2026-11-22)
+#   WEBSITE_REPO_TOKEN             PAT with contents:write on KubeTEE-AI/kubetee-website
+#   EASTWEST_CLIENT_CERT / _KEY    gateway east-west identity (mTLS fetch of /kubetee/evidence)
+# Variable (Settings -> Variables): TDX_GUEST_HOST = evidence host of a deployed guest.
+
+  measure-sign-publish:
+    # Only on a real publish (the canary branch, not a PR / fork), and only once
+    # the evidence host + signing secrets are configured -- otherwise SKIP (not
+    # fail) so builds stay green until the attestation secrets/vars are set.
+    if: ${{ github.repository == 'KubeTEE-AI/sglang' && github.event_name != 'pull_request' && vars.TDX_GUEST_HOST != '' }}
+    needs: [provenance, build]
+    uses: KubeTEE-AI/kubetee-website/.github/workflows/measure-sign-publish.yml@main
+    with:
+      image_ref: ${{ needs.provenance.outputs.image }}@${{ needs.build.outputs.digest }}
+      tee: tdx
+      model: sglang-kimi-k3-1-pro
+      guest_host: ${{ vars.TDX_GUEST_HOST }}
+      evidence_path: /kubetee/evidence
+      json_name: tee-measurements-sglang.tdx.json
+    secrets:
+      TEE_MEASUREMENTS_SIGNING_KEY: ${{ secrets.TEE_MEASUREMENTS_SIGNING_KEY }}
+      WEBSITE_REPO_TOKEN: ${{ secrets.WEBSITE_REPO_TOKEN }}
+      EASTWEST_CLIENT_CERT: ${{ secrets.EASTWEST_CLIENT_CERT }}
+      EASTWEST_CLIENT_KEY: ${{ secrets.EASTWEST_CLIENT_KEY }}
+# === end KubeTEE attestation automation hook ===

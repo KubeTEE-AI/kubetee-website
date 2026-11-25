@@ -1,0 +1,169 @@
+# Reusable "measure -> sign -> publish" stage for EVERY KubeTEE image build.
+#
+# Called (workflow_call) by the image build workflows AFTER the immutable digest
+# is pushed -- `KubeTEE-AI/sglang` `build-kimi-k31-granian-canary.yml` (the
+# `v0.5.23` and `nightly` lineages) and `KubeTEE-AI/litellm`
+# `build-litellm-overlay.yaml`. One shared stage, so every new image is measured,
+# signed and published identically and clients can validate `GET /v1/attestation`
+# the moment the image serves traffic.
+#
+# The register set (MRTD/RTMR0-3/MRCONFIGID) is a function of the Kata launch
+# config, NOT the image or the node -- so it is shared across nodes and lineages.
+# A new image adds provenance + a live verification that a guest running THAT image
+# reports those registers; it does not change the registers.
+#
+# Inputs:
+#   image_ref      full `ghcr.io/...:tag@sha256:digest` that was just built
+#   tee            `tdx` (SGLang backend) or `snp` (LiteLLM gateway)
+#   model          CoRIM model class (the model, never a node/deployment suffix)
+#   guest_host     evidence endpoint of a DEPLOYED guest of image_ref (mTLS host)
+#   evidence_path  `/kubetee/evidence` (tdx) or `/v1/attestation` (snp)
+#
+# Secrets (caller must pass through):
+#   TEE_MEASUREMENTS_SIGNING_KEY   offline Ed25519 PEM (key_id kubetee-measurements-2026-11-22)
+#   WEBSITE_REPO_TOKEN             repo-scoped token to push to KubeTEE-AI/kubetee-website@main
+#   EASTWEST_CLIENT_CERT / _KEY    (tdx) gateway east-west identity to fetch evidence over mTLS
+#
+# Everything is GH-hosted + GH Actions only (`.cursor/rules/gh-only-image-builds.mdc`);
+# no cluster node is used to build or sign.
+
+name: Measure, sign and publish TEE measurements
+
+on:
+  workflow_call:
+    inputs:
+      image_ref:      { required: true,  type: string }
+      tee:            { required: true,  type: string }
+      model:          { required: false, type: string, default: "sglang-kimi-k3-1-pro" }
+      guest_host:     { required: true,  type: string }
+      evidence_path:  { required: false, type: string, default: "/kubetee/evidence" }
+      json_name:      { required: false, type: string, default: "tee-measurements-sglang.tdx.json" }
+    secrets:
+      TEE_MEASUREMENTS_SIGNING_KEY: { required: false }
+      WEBSITE_REPO_TOKEN:           { required: false }
+      EASTWEST_CLIENT_CERT:         { required: false }
+      EASTWEST_CLIENT_KEY:          { required: false }
+  # Manual post-deploy fallback: run this once a human/Fleet deploy of image_ref is
+  # serving (e.g. if the build-time poll timed out). Same measure->sign->publish path.
+  workflow_dispatch:
+    inputs:
+      image_ref:     { required: true,  type: string, description: "ghcr.io/...:tag@sha256:digest already deployed" }
+      tee:           { required: true,  type: string, description: "tdx | snp" }
+      model:         { required: false, type: string, default: "sglang-kimi-k3-1-pro" }
+      guest_host:    { required: true,  type: string, description: "evidence host of a deployed guest of image_ref" }
+      evidence_path: { required: false, type: string, default: "/kubetee/evidence" }
+      json_name:     { required: false, type: string, default: "tee-measurements-sglang.tdx.json" }
+
+permissions:
+  contents: read
+
+jobs:
+  measure-sign-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout publisher (kubetee-website)
+        uses: actions/checkout@v4
+        with:
+          repository: KubeTEE-AI/kubetee-website
+          ref: main
+          token: ${{ secrets.WEBSITE_REPO_TOKEN }}
+
+      - name: Install toolchain (cbor2 + cryptography)
+        run: python3 -m pip install --user cbor2 cryptography
+
+      # 1. MEASURE -- pull the live evidence envelope a DEPLOYED guest of
+      #    image_ref minted (user decision: live-at-deploy capture). The guest's
+      #    evidence route is node-agnostic. The registers are launch-config-derived
+      #    and stable across image rolls, but we still capture from a guest running
+      #    THIS image and fail closed if none is serving -- so we poll until the
+      #    human/Fleet deploy of image_ref lands (or time out). The gate that matters
+      #    for the registers is per launch-config (the register set is shared across
+      #    nodes/lineages), but the provenance binds the published instance to the
+      #    exact image digest that minted the quote.
+      - name: Capture live evidence envelope (poll for deployed guest of image_ref)
+        env:
+          GUEST_HOST: ${{ inputs.guest_host }}
+          EVIDENCE_PATH: ${{ inputs.evidence_path }}
+          EASTWEST_CLIENT_CERT: ${{ secrets.EASTWEST_CLIENT_CERT }}
+          EASTWEST_CLIENT_KEY: ${{ secrets.EASTWEST_CLIENT_KEY }}
+          IMAGE_REF: ${{ inputs.image_ref }}
+        run: |
+          set -euo pipefail
+          DEADLINE=$(( $(date +%s) + ${POLL_TIMEOUT_SECONDS:-7200} ))   # default 2h (large CC guest boot)
+          attempt=0
+          while :; do
+            attempt=$((attempt + 1))
+            NONCE=$(openssl rand -hex 32)
+            URL="https://${GUEST_HOST}:8443${EVIDENCE_PATH}?role=nim-terminator&nonce=${NONCE}"
+            if [ -n "${EASTWEST_CLIENT_CERT}" ]; then
+              CURL=(curl -fsS --cert <(printf '%s' "$EASTWEST_CLIENT_CERT") --key <(printf '%s' "$EASTWEST_CLIENT_KEY") --cacert /etc/ssl/certs/ca-certificates.crt)
+            else
+              CURL=(curl -fsS --cacert /etc/ssl/certs/ca-certificates.crt)
+            fi
+            if "${CURL[@]}" "$URL" -o evidence.json 2>/dev/null && python3 -c 'import json,sys; json.load(open("evidence.json"))' 2>/dev/null; then
+              echo "captured live evidence envelope for ${IMAGE_REF} on attempt ${attempt}"
+              exit 0
+            fi
+            rm -f evidence.json
+            if [ "$(date +%s)" -ge "$DEADLINE" ]; then
+              echo "::error::no deployed guest of ${IMAGE_REF} answered ${EVIDENCE_PATH} within ${POLL_TIMEOUT_SECONDS:-7200}s -- refusing to publish (fail closed; deploy image_ref or run this via workflow_dispatch once serving)"
+              exit 1
+            fi
+            echo "attempt ${attempt}: guest of ${IMAGE_REF} not serving yet; retry in 30s..."
+            sleep 30
+          done
+
+      # 2-4. VERIFY + SIGN + PUBLISH -- the shared publisher. Extracts the TDX/SNP
+      #      registers from the quote, checks the report_data JCS binding, signs
+      #      RFC 8785 with the CI key, writes .well-known records + the RVPS CoRIM.
+      - name: Measure, verify, sign and publish
+        env:
+          TEE_MEASUREMENTS_SIGNING_KEY: ${{ secrets.TEE_MEASUREMENTS_SIGNING_KEY }}
+          TEE: ${{ inputs.tee }}
+          MODEL: ${{ inputs.model }}
+          IMAGE_REF: ${{ inputs.image_ref }}
+          JSON_NAME: ${{ inputs.json_name }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, subprocess, datetime
+          meta = {
+            "tee": os.environ["TEE"],
+            "not_before": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "initdata": json.load(open("public/.well-known/%s" % os.environ["JSON_NAME"]))["initdata"]
+                        if os.environ["TEE"] == "tdx" else {},
+            "guest":    json.load(open("public/.well-known/%s" % os.environ["JSON_NAME"]))["guest"]
+                        if os.environ["TEE"] == "tdx" else {},
+            "provenance": {"image_ref": os.environ["IMAGE_REF"],
+                           "build_run": os.environ.get("GITHUB_SERVER_URL", "https://github.com") + "/" +
+                                        os.environ.get("GITHUB_REPOSITORY", "") + "/actions/runs/" +
+                                        os.environ.get("GITHUB_RUN_ID", "")},
+          }
+          json.dump(meta, open("meta.json", "w"))
+          PY
+          python3 scripts/publish-tee-measurements.py \
+            --envelope evidence.json \
+            --provenance meta.json \
+            --model "$MODEL" \
+            --json-name "$JSON_NAME" \
+            --require-signature \
+            --out-dir public/.well-known
+
+      # 5. PUBLISH -- auto-commit the signed records to kubetee-website@main so GH
+      #    Pages serves them immediately (user decision: auto-commit). This makes
+      #    the reference live BEFORE the new image serves traffic.
+      - name: Commit published measurements to kubetee-website@main
+        env:
+          IMAGE_REF: ${{ inputs.image_ref }}
+          TEE: ${{ inputs.tee }}
+        run: |
+          set -euo pipefail
+          cd "${GITHUB_WORKSPACE}"
+          git config user.name  "kubetee-attestation-bot"
+          git config user.email "attestation@kubetee.ai"
+          git add public/.well-known/tee-measurements* public/.well-known/tee-reference-values*
+          if git diff --cached --quiet; then
+            echo "no measurement change"; exit 0
+          fi
+          git commit -m "attestation: measure+sign+publish ${IMAGE_REF} (${TEE})"
+          git push origin HEAD:main
