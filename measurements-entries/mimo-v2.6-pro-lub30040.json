@@ -1,0 +1,77 @@
+{
+  "id": "mimo-v2.6-pro-mtls-evidence-3117f580-20261125-lub30040",
+  "model": "xiaomi/mimo-v2.6-pro",
+  "subject": "sglang-strict-mtls-backend",
+  "role": "nim-terminator",
+  "tee": "tdx",
+  "runtime_class": "kata-qemu-nvidia-gpu-tdx-runtime-rs",
+  "image_ref": "ghcr.io/kubetee-ai/sglang:mtls-evidence-3117f580-20261125@sha256:982c8c10f59c5e8fb724a9cc5d67e8f777c5fde36704d79a5e0dba5f727a9590",
+  "provenance": {
+    "source_repo": "https://github.com/KubeTEE-AI/sglang",
+    "source_repo_note": "KubeTEE SGLang fork (public fork of sgl-project/sglang)",
+    "transport_branch": "kubetee-overlay",
+    "source_commit": "d12bfac85c87076fd80983751d4f10f5dcb5c377",
+    "source_commit_note": "d12bfac85c87076fd80983751d4f10f5dcb5c377 -- ports the in-guest GET /kubetee/evidence route (kubetee_evidence.py + http_server.py mount, patch 0005-evidence-route) onto the strict-mTLS transport base",
+    "image_ref": "ghcr.io/kubetee-ai/sglang:mtls-evidence-3117f580-20261125@sha256:982c8c10f59c5e8fb724a9cc5d67e8f777c5fde36704d79a5e0dba5f727a9590",
+    "amd64_manifest_digest": "sha256:982c8c10f59c5e8fb724a9cc5d67e8f777c5fde36704d79a5e0dba5f727a9590",
+    "build_run": "https://github.com/KubeTEE-AI/sglang/actions/runs/45639037187",
+    "validated_at": "2026-11-26",
+    "validated_on": "mimo-v2-6-pro-rl-sglang-b300-cc-0 (lu-b300-40, eu-lu-luxembourg-133)",
+    "_quote_minting_image": "The TDX quote whose MRTD/RTMR0-3/MRCONFIGID this record pins was minted by THIS image (run 45639037187, source d12bfac) on the lu-b300-40 node. Same immutable image as the tx-b200-16 MiMo record; MRTD + MRCONFIGID + RTMR1/2/3 are byte-identical to it across the two nodes (identical guest launch stack), differing only in node-specific RTMR0.",
+    "transport_overlay_base_images": [
+      {
+        "tag": "mtls-3117f580-20261124",
+        "base": "sgl-project/sglang nightly-cu134-20261122-3117f58 @ 3117f5801752bfd8ea9aee8d3ba3dff8562378fd",
+        "upstream_base_image": "lmsysorg/sglang:nightly-cu134-20261122-3117f58@sha256:ffb8652016b1b895cd2dee12f6bffcb7a5fa65af71378e1018c9f702faa05063",
+        "build_run": "https://github.com/KubeTEE-AI/sglang/actions/runs/45359236784",
+        "image_ref": "ghcr.io/kubetee-ai/sglang:mtls-3117f580-20261124@sha256:7978ad60c3f7b64c24993eed747eeea1d0e1be6396f4bb9357a1c19934419348",
+        "model_layer_patches": "none"
+      }
+    ]
+  },
+  "measurements": {
+    "mrtd": "hex:382d7bb61e152a5cc6eb22922a4dc9d33025211e24ec199fe38d6233c39cd86bf633e3c4f6e62393cf7ce6da91069ca0",
+    "rtmr0": "hex:f448be9c9b0a239e72852dc0711f87593a961823318ece53123693e555c08ee4fdd5908d9f12dafbc251f0b4ef19ef0b",
+    "rtmr1": "hex:97fa8ac275f656b876de7c68709608bfe6ace60b58a3b8fb6e990c15bd8711ce8807ed86956f39b62afb9a9daee80227",
+    "rtmr2": "hex:77903a48ffcc66809d3f01a9853186ac08bc0081d06e4d05a0e0307450188e08d9f21b9c77e6747df0a90e65d7e3bff9",
+    "rtmr3": "hex:000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "mrconfigid": "hex:0484a58e5927efd31bf871c74bcc9f1768f4335bb92340176989b3c5b320f9341d772b9e3e9c4fe4d824613cc19e6e0b",
+    "_capture": "Captured 2026-11-26T10:28:53Z from the live lu-b300-40 guest (mimo-v2-6-pro-rl-sglang-b300-cc-0) via the gateway hardware-evidence relay (X-KubeTEE-Backend-Evidence, kubetee.tdx-evidence/1), parsed from the TDX quote TDINFO (no pod disruption). MRCONFIGID = SHA-384(InitData TOML) || 0^16 (byte-exact match to the tx-b200-16 record). MRTD/RTMR1/RTMR2/RTMR3 byte-identical to the tx-b200-16 MiMo record and the lu-b300-39 Kimi record (identical guest launch stack). RTMR0 is node/host-firmware specific and is DISTINCT on lu-b300-40 (f448be9c...) -- the only register that legitimately differs per node. This record exists because any-active-record matching treats RTMR0 as an enforcing field, so each (model x node) launch needs its own record. Direct strict-mTLS GET /kubetee/evidence is currently blocked (eastwest-bench-client cert expired 2026-11-11); captured via the gateway relay instead. CCEL replay cross-check not re-run here (register identity + MRCONFIGID binding are byte-exact against the twin record)."
+  },
+  "initdata": {
+    "sha384": "0484a58e5927efd31bf871c74bcc9f1768f4335bb92340176989b3c5b320f9341d772b9e3e9c4fe4d824613cc19e6e0b",
+    "algorithm": "sha384",
+    "host_data_prefix32": "0484a58e5927efd31bf871c74bcc9f1768f4335bb92340176989b3c5b320f934",
+    "host_data_semantics": "kata4-sha384-uncompressed-initdata-toml-prefix32",
+    "role": "image-gen",
+    "annotation": "io.katacontainers.config.hypervisor.cc_init_data",
+    "kbs_url": "https://kbs.kubetee.ai",
+    "files": {
+      "aa.toml": "token_configs.kbs.url = https://kbs.kubetee.ai",
+      "cdh.toml": "kbc.name = cc_kbc, kbc.url = https://kbs.kubetee.ai",
+      "policy.rego": "agent_policy defaults; ExecProcessRequest=false, WriteStreamRequest=false, ReadStreamRequest=true"
+    }
+  },
+  "guest": {
+    "kata_version": "4.4.0",
+    "kata_commit": "f9cbda4d235b345340bf461e4aaba8c89e841d8d",
+    "kata_deploy_chart": "4.4.0+kubetee.1",
+    "ovmf_version": "edk2-stable202608",
+    "ovmf_fd_sha256": "2a2dc2710b0cfafc813310c7e98c67b72b919b8e1572d52a4c79466a2e499226",
+    "ovmf_note": "in-tree lazy-accept OVMF.inteltdx.fd (edk2-stable202608); CAPTURED 2026-11-25 on tx-b200-16 at the exact -bios path this guest launches from (/opt/kata/share/ovmf/OVMF.inteltdx.fd). Matches the lazy-accept pin and the lu-b300-39 capture.",
+    "shim_sha256": "82cd97b52ac89b6a73871d5ca68b61f840c5d84e030f28b72dc03f9baab9a73a",
+    "shim_note": "/opt/kata/runtime-rs/bin/containerd-shim-kata-v2, overlay v4.4.0-fix11649-t15t16-vsocktimeout (branch kubetee-fix11649-t15t16-440); CAPTURED 2026-11-25 on tx-b200-16",
+    "shim_overlay_image": "ghcr.io/kubetee-ai/kata-deploy-shim-overlay:v4.4.0-fix11649-t15t16-vsocktimeout@sha256:a8699a8705d95d2287685b59321e70a326cfdb19a54345524edadd6b3635e10c",
+    "shim_carried_fixes": [
+      "fix15 (#11649 idempotent block hotplug + stale-fdset reclaim)",
+      "T15/T16 (#13665/#13746 missing-task VM stop)"
+    ],
+    "shim_dropped_fixes": [
+      "fix16 (#13641 inotify) -- consciously dropped",
+      "fix9-12 orphan reaper -- consciously dropped"
+    ],
+    "nvidia_guest_driver": "615.71.09",
+    "kernel_params_note": "agent.guest_components_rest_api=all is set on this guest (measured into RTMR1) -- required for the in-guest evidence surface (GET 127.0.0.1:8006/aa/evidence) that /kubetee/evidence relays."
+  },
+  "captured_at": "2026-11-26T10:28:53Z"
+}
