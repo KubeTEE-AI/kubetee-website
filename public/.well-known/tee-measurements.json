@@ -1,22 +1,22 @@
 {
   "schema": "kubetee.tee-measurements/2",
-  "version": 1,
+  "version": 2,
   "role": "litellm",
   "tee": "snp",
   "runtime_class": "kata-qemu-snp-runtime-rs",
   "status": "active",
-  "not_before": "2026-11-22T06:10:00Z",
+  "not_before": "2026-11-26T13:35:00Z",
   "key_id": "kubetee-measurements-2026-11-25",
   "key_url": "https://kubetee.ai/.well-known/tee-measurements-signing-key-2026.json",
   "subject": "litellm-database",
   "provenance": {
     "source_repo": "https://github.com/KubeTEE-AI/litellm",
-    "source_commit": "836124e8830c51c8f07ccfe013e21cfaedfac420",
+    "source_commit": "62363e6b9b1334be5dc5fae362b8bf0122594e70",
     "base_image": "ghcr.io/berriai/litellm-database@sha256:3b239acc68e601c436e5feeec7ca0f01a41cd5dffe50975142b7fa7155c1b2ff",
-    "image_ref": "ghcr.io/kubetee-ai/litellm-database:1.110.2-kubetee.1@sha256:2f47378d242aba5d4a73d4f6b7853e3fa1160e1c6020545960fa4a04cd651a96",
-    "amd64_manifest_digest": "sha256:2f47378d242aba5d4a73d4f6b7853e3fa1160e1c6020545960fa4a04cd651a96",
-    "build_run": "https://github.com/KubeTEE-AI/litellm/actions/runs/44991222190",
-    "cosign_bundle": "https://github.com/KubeTEE-AI/litellm/actions/runs/44991222190/artifacts",
+    "image_ref": "ghcr.io/kubetee-ai/litellm-database:1.110.2-kubetee.3@sha256:ec79ba126c8cf5339b045b0f3e4d686c80f93f619861007b1f656f938f7fc645",
+    "amd64_manifest_digest": "sha256:ec79ba126c8cf5339b045b0f3e4d686c80f93f619861007b1f656f938f7fc645",
+    "build_run": "https://github.com/KubeTEE-AI/litellm/actions/runs/45781892821",
+    "cosign_bundle": "https://github.com/KubeTEE-AI/litellm/actions/runs/45781892821/artifacts",
     "cosign_identity": "https://github.com/KubeTEE-AI/litellm/.github/workflows/build-litellm-overlay.yaml@refs/heads/kubetee-prod",
     "cosign_oidc_issuer": "https://token.actions.githubusercontent.com"
   },
@@ -26,31 +26,13 @@
       "derivation": "independent-recomputation-and-live-report",
       "tool": "sev-snp-measure",
       "tool_source": "https://pypi.org/project/sev-snp-measure/0.0.13/",
-      "tool_artifact_sha256": "sha256:41031c56f3f64c3d09b9b272f266418e7e7352c0e9808837234627eef6076f27",
-      "observed_pod_identities": {
-        "litellm-8687c86967-cglbl": {
-          "verified_at": "2026-11-21T23:01:50Z",
-          "reference": "https://github.com/taostat/gm-miner/commit/16ea2d4c735e64b26d4ccc5080863efcd66f0244",
-          "signature_checked": true
-        },
-        "litellm-8687c86967-jl7xq": {
-          "verified_at": "2026-11-22T06:50:10Z",
-          "reference": "https://github.com/taostat/gm-miner/actions/runs/45001949494",
-          "signature_checked": true
-        },
-        "litellm-8687c86967-k4wgs": {
-          "verified_at": "2026-11-22T06:50:17Z",
-          "reference": "https://github.com/taostat/gm-miner/actions/runs/45001949494",
-          "signature_checked": true
-        }
-      },
-      "observed_ref": "https://github.com/taostat/gm-miner/pull/419"
+      "tool_artifact_sha256": "sha256:41031c56f3f64c3d09b9b272f266418e7e7352c0e9808837234627eef6076f27"
     },
     "host_data": {
-      "sha384_uncompressed_initdata_toml_prefix32": "5bd1fe028a632b9efc6eceedcbf5a344b13ed1dab6c1b3a8295f0ff20aebe3aa",
-      "sha384_uncompressed_initdata_toml": "sha384:5bd1fe028a632b9efc6eceedcbf5a344b13ed1dab6c1b3a8295f0ff20aebe3aa3cd773703afb77f5ee2c2fbe567b50ab",
+      "sha384_uncompressed_initdata_toml": "sha384:52de81477823903d498a9484f61007af3ee9b9e139294d929709b99b54619a2d9011b6a98e780b43109f0c5a0dbb5c75",
+      "sha384_uncompressed_initdata_toml_prefix32": "52de81477823903d498a9484f61007af3ee9b9e139294d929709b99b54619a2d",
       "semantics": "kata4-sha384-uncompressed-initdata-toml-prefix32",
-      "compressed_blob_sha256": "sha256:eeb5063d03a4bbe2ef48860b28820ed47226b20c3602bed5acd478571a67945c"
+      "compressed_blob_sha256": "sha256:71ee1ce52c5f61cb6f6230582f9ce3511809fd10a0106798233636a90dde92a6"
     },
     "report_data": {
       "schema": "kubetee.attestation.v1",
@@ -88,12 +70,12 @@
       "kernel_cmdline_sha256": "sha256:4e1353ceb3239c23ca26277859451584eddd8dd57cd63f82872724b77c83cf8a",
       "kernel_cmdline_terminator": "nul",
       "composition_ref": "https://github.com/kata-containers/kata-containers/blob/4.4.0/versions.yaml",
-      "agent_policy_ref": "https://github.com/pamanseau/kubetee-fleet/blob/5aa89c71e7bd25af8a75d7cb9ab518632a56817a/infrastructure/kubetee/infrastructure/litellm/production/initdata-litellm.toml",
+      "agent_policy_ref": "https://github.com/pamanseau/fleet-kubetee/blob/f02174eb031086c3a9531876715066163bbac3f5/infrastructure/kubetee/infrastructure/litellm/production/initdata-litellm.toml",
       "exec_process_allowed": false
     },
     "images": {
-      "litellm": "ghcr.io/kubetee-ai/litellm-database:1.110.2-kubetee.1@sha256:2f47378d242aba5d4a73d4f6b7853e3fa1160e1c6020545960fa4a04cd651a96",
-      "fetch-secrets": "ghcr.io/kubetee-ai/litellm-database:1.110.2-kubetee.1@sha256:2f47378d242aba5d4a73d4f6b7853e3fa1160e1c6020545960fa4a04cd651a96"
+      "litellm": "ghcr.io/kubetee-ai/litellm-database:1.110.2-kubetee.3@sha256:ec79ba126c8cf5339b045b0f3e4d686c80f93f619861007b1f656f938f7fc645",
+      "fetch-secrets": "ghcr.io/kubetee-ai/litellm-database:1.110.2-kubetee.3@sha256:ec79ba126c8cf5339b045b0f3e4d686c80f93f619861007b1f656f938f7fc645"
     },
     "ear": {
       "verifier": "CoCo Trustee",
@@ -107,29 +89,12 @@
     "tls_domain": "llm.kubetee.ai",
     "nonce_required": true,
     "fresh_certificate_per_boot": true,
-    "all_replicas_verified": true,
-    "observed_pod_identities": {
-      "litellm-8687c86967-cglbl": {
-        "verified_at": "2026-11-21T23:01:50Z",
-        "reference": "https://github.com/taostat/gm-miner/commit/16ea2d4c735e64b26d4ccc5080863efcd66f0244",
-        "signature_checked": true
-      },
-      "litellm-8687c86967-jl7xq": {
-        "verified_at": "2026-11-22T06:50:10Z",
-        "reference": "https://github.com/taostat/gm-miner/actions/runs/45001949494",
-        "signature_checked": true
-      },
-      "litellm-8687c86967-k4wgs": {
-        "verified_at": "2026-11-22T06:50:17Z",
-        "reference": "https://github.com/taostat/gm-miner/actions/runs/45001949494",
-        "signature_checked": true
-      }
-    }
+    "all_replicas_verified": true
   },
   "signature": {
     "alg": "ed25519",
     "key_id": "kubetee-measurements-2026-11-25",
     "canonicalization": "RFC8785-without-signature-member",
-    "sig": "EjEDURXcQnkqYLTliOeNnzT9o7y2Qez-3UBjIpFukZjQA7gjH5St6P-0gqCj7JVHpjl4HwP-OyY39mpuJMBXCA"
+    "sig": "mMeFLEOWoT3y3bgujxs_L69ojn0uVK4O-HqCznNDfzk7y4d_PFAHHUJQgVPhHB-xKk6WVM7ddsVacq6yZVgGAg"
   }
 }
