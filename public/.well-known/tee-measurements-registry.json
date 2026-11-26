@@ -3,7 +3,7 @@
   "version": 1,
   "key_id": "kubetee-measurements-2026-11-25",
   "key_url": "https://kubetee.ai/.well-known/tee-measurements-signing-key-2026.json",
-  "issued_at": "2026-11-26T10:28:58Z",
+  "issued_at": "2026-11-26T13:35:39Z",
   "policy": {
     "match": "any-active-record",
     "match_note": "Observed TEE evidence is legitimate iff its registers match ANY record with status=active and now <= valid_until, for the same `tee`. No per-model / per-image pin on the verifier.",
@@ -30,7 +30,7 @@
         "build_run": "https://github.com/KubeTEE-AI/sglang/actions/runs/45497390909",
         "validated_at": "2026-11-25",
         "validated_on": "kimi-k3-1-pro-sglang-b300-cc-0 (lu-b300-39)",
-        "_quote_minting_image": "The TDX quote whose MRTD/RTMR0-3/MRCONFIGID this record pins was minted by THIS image (run 45497390909, source b8f8015d3291). Source b8f8015d3291 adds the in-guest GET /kubetee/evidence route (root path) over the ab5a17e89e64 strict-mTLS transport. The in-app route does not affect the guest's launch registers (see measurements._capture), so an earlier transport-only canary and this one share identical MRTD/RTMR.",
+        "_quote_minting_image": "The TDX quote whose MRTD/RTMR0-3/MRCONFIGID this record pins was minted by THIS image (run 45497390909, source b8f8015d3291). Source b8f8015d3291 adds the in-guest GET /kubetee/evidence route (root path) over the ab5a17e89e64 strict-mTLS transport. The in-app route does not affect the guest's launch registers (it adds nothing measured at launch; see measurements.mrtd/rtmr0/rtmr1/rtmr2/rtmr3/mrconfigid), so an earlier transport-only canary and this one share identical MRTD/RTMR.",
         "superseded_canary": "ghcr.io/kubetee-ai/sglang:kimi-k31-granian-mtls-45228495550-bf52f822@sha256:d808dd7bec0d1ebb3f6942e47f636a69c57ec4d74497eaad4a81030da0a0437a (transport-only canary bf52f8223b88, run 45228495550) \u2014 the strict-mTLS transport validated live 2026-11-23; rolled out in favor of the quote-minting canary above.",
         "pending_roll_image": "ghcr.io/kubetee-ai/sglang:kimi-k31-granian-mtls-45514864315-f3683545@sha256:8cb76869163f94ec190e3431a2f26e440da00e60e454f2fd7ce6ad504661c095 (source f3683545f8cf, run 45514864315) \u2014 adds the /v1/kubetee/evidence alias for the LiteLLM gateway relay path; same launch registers as above (in-app route), scheduled roll.",
         "transport_overlay_base_images": [
@@ -135,7 +135,7 @@
         "rtmr2": "hex:77903a48ffcc66809d3f01a9853186ac08bc0081d06e4d05a0e0307450188e08d9f21b9c77e6747df0a90e65d7e3bff9",
         "rtmr3": "hex:000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
         "mrconfigid": "hex:0484a58e5927efd31bf871c74bcc9f1768f4335bb92340176989b3c5b320f9341d772b9e3e9c4fe4d824613cc19e6e0b",
-        "_capture": "Captured from the live guest over strict mTLS GET /kubetee/evidence?role=nim-terminator (2026-11-25T17:41:08Z), parsed from the quote TDINFO. report_data = SHA-256(JCS epoch statement) || 0^32 (verified MATCH). MRCONFIGID = SHA-384(InitData TOML) || 0^16 (byte-exact MATCH). CCEL replay (24 records, 22 extended, TDX SHA-384(RTMR||digest)) reproduces RTMR0-3 exactly (ALL MATCH). RTMR0 is node/host-firmware specific (this guest on tx-b200-16) and legitimately differs from the lu-b300-40 Kimi capture; MRTD/MRCONFIGID/RTMR1/RTMR2/RTMR3 match it. This is why the registry matches ANY active record rather than one pinned register set."
+        "_capture": "Captured from the live guest over strict mTLS GET /kubetee/evidence?role=nim-terminator (2026-11-25T17:41:08Z), parsed from the quote TDINFO. report_data = SHA-256(JCS epoch statement) || 0^32 (verified MATCH). MRCONFIGID = SHA-384(InitData TOML) || 0^16 (byte-exact MATCH). CCEL replay (24 records, 22 extended, TDX SHA-384(RTMR||digest)) reproduces RTMR0-3 exactly (ALL MATCH). RTMR0 is node/host-firmware specific (this guest on tx-b200-16) and legitimately differs from the lu-b300-39 Kimi capture; MRTD/MRCONFIGID/RTMR1/RTMR2/RTMR3 match it. This is why the registry matches ANY active record rather than one pinned register set."
       },
       "initdata": {
         "sha384": "0484a58e5927efd31bf871c74bcc9f1768f4335bb92340176989b3c5b320f9341d772b9e3e9c4fe4d824613cc19e6e0b",
@@ -260,6 +260,6 @@
     "alg": "ed25519",
     "key_id": "kubetee-measurements-2026-11-25",
     "canonicalization": "RFC8785-without-signature-member",
-    "sig": "T_oocq3hVS0WowRx0xXPaTciEsMidscIUM9Nd3JP3dOQf9wG0DVarSTQfDxU_X6PI1_xNhfE69N4RrjAisI_BA"
+    "sig": "b6uvmGFvaDr2VDa7PMWd5-gjyszGsZA41ZQLB8CczEBxc0VYN6BEyPvP3lcMSv2rLD-fTNeZNK2mvQnAfHtECw"
   }
 }
