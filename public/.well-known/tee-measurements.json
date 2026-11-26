@@ -1,22 +1,22 @@
 {
   "schema": "kubetee.tee-measurements/2",
-  "version": 4,
+  "version": 5,
   "role": "litellm",
   "tee": "snp",
   "runtime_class": "kata-qemu-snp-runtime-rs",
   "status": "active",
-  "not_before": "2026-11-26T18:06:54Z",
+  "not_before": "2026-11-26T21:45:00Z",
   "key_id": "kubetee-measurements-2026-11-25",
   "key_url": "https://kubetee.ai/.well-known/tee-measurements-signing-key-2026.json",
   "subject": "litellm-database",
   "provenance": {
     "source_repo": "https://github.com/KubeTEE-AI/litellm",
-    "source_commit": "6a16d718e7efc8bc1fc1bcd3c7a4a8189d93a728",
+    "source_commit": "2a7ddd45d5461a0985608a7d85b264b2a62771f3",
     "base_image": "ghcr.io/berriai/litellm-database@sha256:3b239acc68e601c436e5feeec7ca0f01a41cd5dffe50975142b7fa7155c1b2ff",
-    "image_ref": "ghcr.io/kubetee-ai/litellm-database:1.110.2-kubetee.6@sha256:14b7601d7468a47744c19abd4f5ecccbde3a65e668881f054f6cb993ddafc8da",
-    "amd64_manifest_digest": "sha256:14b7601d7468a47744c19abd4f5ecccbde3a65e668881f054f6cb993ddafc8da",
-    "build_run": "https://github.com/KubeTEE-AI/litellm/actions/runs/45871306816",
-    "cosign_bundle": "https://github.com/KubeTEE-AI/litellm/actions/runs/45871306816/artifacts",
+    "image_ref": "ghcr.io/kubetee-ai/litellm-database:1.110.2-kubetee.7@sha256:8706feec2d792f453a4444e4de7886a3a182a17535ec8b06026c7956d2277005",
+    "amd64_manifest_digest": "sha256:8706feec2d792f453a4444e4de7886a3a182a17535ec8b06026c7956d2277005",
+    "build_run": "https://github.com/KubeTEE-AI/litellm/actions/runs/45897102182",
+    "cosign_bundle": "https://github.com/KubeTEE-AI/litellm/actions/runs/45897102182/artifacts",
     "cosign_identity": "https://github.com/KubeTEE-AI/litellm/.github/workflows/build-litellm-overlay.yaml@refs/heads/kubetee-prod",
     "cosign_oidc_issuer": "https://token.actions.githubusercontent.com"
   },
@@ -29,10 +29,10 @@
       "tool_artifact_sha256": "sha256:41031c56f3f64c3d09b9b272f266418e7e7352c0e9808837234627eef6076f27"
     },
     "host_data": {
-      "sha384_uncompressed_initdata_toml": "sha384:c89e8b5ee229f88787789f3bae55934654d8ada2b42964ebefa6424d13bd53b15616e2c81695b3d416425e2eabfb2eba",
-      "sha384_uncompressed_initdata_toml_prefix32": "c89e8b5ee229f88787789f3bae55934654d8ada2b42964ebefa6424d13bd53b1",
+      "sha384_uncompressed_initdata_toml": "sha384:06b605be4a32bb6b99a536ae13754d24fd1ec7ee493d52dd68cf8ab6b7afbbba87fc08343b222cfa81a430ea75f5130e",
+      "sha384_uncompressed_initdata_toml_prefix32": "06b605be4a32bb6b99a536ae13754d24fd1ec7ee493d52dd68cf8ab6b7afbbba",
       "semantics": "kata4-sha384-uncompressed-initdata-toml-prefix32",
-      "compressed_blob_sha256": "sha256:2503df9c7ccda733603fce8ca1fbc21bb46f8848ff35aa5de475e4a6d36c7c91"
+      "compressed_blob_sha256": "sha256:2a89e97b8c27c12fbf7c86c4c6ee30be622332939eb6159a1c02f7b7d2194800"
     },
     "report_data": {
       "schema": "kubetee.attestation.v1",
@@ -70,12 +70,12 @@
       "kernel_cmdline_sha256": "sha256:4e1353ceb3239c23ca26277859451584eddd8dd57cd63f82872724b77c83cf8a",
       "kernel_cmdline_terminator": "nul",
       "composition_ref": "https://github.com/kata-containers/kata-containers/blob/4.4.0/versions.yaml",
-      "agent_policy_ref": "https://github.com/pamanseau/fleet-kubetee/blob/22d2d88b1e7ca1f1b1e7871189a55d3bfdab907a/infrastructure/kubetee/infrastructure/litellm/production/initdata-litellm.toml",
+      "agent_policy_ref": "https://github.com/pamanseau/fleet-kubetee/blob/e47ff4782fd8641e03a59ae936b511bdfcbeecca/infrastructure/kubetee/infrastructure/litellm/production/initdata-litellm.toml",
       "exec_process_allowed": false
     },
     "images": {
-      "litellm": "ghcr.io/kubetee-ai/litellm-database:1.110.2-kubetee.6@sha256:14b7601d7468a47744c19abd4f5ecccbde3a65e668881f054f6cb993ddafc8da",
-      "fetch-secrets": "ghcr.io/kubetee-ai/litellm-database:1.110.2-kubetee.6@sha256:14b7601d7468a47744c19abd4f5ecccbde3a65e668881f054f6cb993ddafc8da"
+      "litellm": "ghcr.io/kubetee-ai/litellm-database:1.110.2-kubetee.7@sha256:8706feec2d792f453a4444e4de7886a3a182a17535ec8b06026c7956d2277005",
+      "fetch-secrets": "ghcr.io/kubetee-ai/litellm-database:1.110.2-kubetee.7@sha256:8706feec2d792f453a4444e4de7886a3a182a17535ec8b06026c7956d2277005"
     },
     "ear": {
       "verifier": "CoCo Trustee",
@@ -92,14 +92,16 @@
     "all_replicas_verified": true
   },
   "previous": {
-    "version": 3,
-    "not_before": "2026-11-26T16:15:37Z",
-    "image_ref": "ghcr.io/kubetee-ai/litellm-database:1.110.2-kubetee.4@sha256:f161a148ab560f19715c63a54fdd6673fa51b80f1e9a067255e66063da4f4dfb",
-    "source_commit": "447a3fca700ab00135f6de6910d42f97f4d0e743",
-    "build_run": "https://github.com/KubeTEE-AI/litellm/actions/runs/45854725433",
+    "version": 4,
+    "not_before": "2026-11-26T18:06:54Z",
+    "image_ref": "ghcr.io/kubetee-ai/litellm-database:1.110.2-kubetee.6@sha256:14b7601d7468a47744c19abd4f5ecccbde3a65e668881f054f6cb993ddafc8da",
+    "source_commit": "6a16d718e7efc8bc1fc1bcd3c7a4a8189d93a728",
+    "build_run": "https://github.com/KubeTEE-AI/litellm/actions/runs/45871306816",
     "host_data": {
-      "sha384_uncompressed_initdata_toml": "sha384:f497fdd0b075c34466a248fe66087a976fe940cf5e288818677ae51bfdf5e5f789b8676a85e17794ed08041fd0febcf9",
-      "sha384_uncompressed_initdata_toml_prefix32": "f497fdd0b075c34466a248fe66087a976fe940cf5e288818677ae51bfdf5e5f7"
+      "sha384_uncompressed_initdata_toml": "sha384:c89e8b5ee229f88787789f3bae55934654d8ada2b42964ebefa6424d13bd53b15616e2c81695b3d416425e2eabfb2eba",
+      "sha384_uncompressed_initdata_toml_prefix32": "c89e8b5ee229f88787789f3bae55934654d8ada2b42964ebefa6424d13bd53b1",
+      "semantics": "kata4-sha384-uncompressed-initdata-toml-prefix32",
+      "compressed_blob_sha256": "sha256:2503df9c7ccda733603fce8ca1fbc21bb46f8848ff35aa5de475e4a6d36c7c91"
     },
     "note": "previous generation kept so a verifier accepts current OR previous during and after a rollout (rollback window). launch_measurement is unchanged across both (a container-image change does not affect the SNP launch measurement) and is declared once at top level."
   },
@@ -107,6 +109,6 @@
     "alg": "ed25519",
     "key_id": "kubetee-measurements-2026-11-25",
     "canonicalization": "RFC8785-without-signature-member",
-    "sig": "7W2jU5E_oYz_-4f1V5FmHVEsRVnaUx-sHUj-wiC7kVztCOKtbO2rHZ4kdXsSBUiliosSd900xFw5S4vqI5q5Aw"
+    "sig": "6NQK55md1OeRhgE0_Yh-jKw_PtUCWFA1TweB9GkMow0EOEKKO_Y8JI-KNllAiAJxcfkKXOPCmvXkV6f34t8fCg"
   }
 }
