@@ -1,0 +1,85 @@
+{
+  "captured_at": "2026-11-25T01:28:17Z",
+  "guest": {
+    "kata_commit": "f9cbda4d235b345340bf461e4aaba8c89e841d8d",
+    "kata_deploy_chart": "4.4.0+kubetee.1",
+    "kata_version": "4.4.0",
+    "nvidia_guest_driver": "615.71.09",
+    "ovmf_fd_sha256": "2a2dc2710b0cfafc813310c7e98c67b72b919b8e1572d52a4c79466a2e499226",
+    "ovmf_note": "in-tree lazy-accept OVMF.inteltdx.fd (edk2-stable202608); CAPTURED 2026-11-24 on lu-b300-39 at the exact -bios path this guest launches from (/opt/kata/share/ovmf/OVMF.inteltdx.fd). Matches the lazy-accept pin.",
+    "ovmf_version": "edk2-stable202608",
+    "shim_carried_fixes": [
+      "fix15 (#11649 idempotent block hotplug + stale-fdset reclaim)",
+      "T15/T16 (#13665/#13746 missing-task VM stop)"
+    ],
+    "shim_dropped_fixes": [
+      "fix16 (#13641 inotify) \u2014 consciously dropped",
+      "fix9-12 orphan reaper \u2014 consciously dropped"
+    ],
+    "shim_note": "/opt/kata/runtime-rs/bin/containerd-shim-kata-v2, overlay v4.4.0-fix11649-t15t16-vsocktimeout (branch kubetee-fix11649-t15t16-440)",
+    "shim_overlay_image": "ghcr.io/kubetee-ai/kata-deploy-shim-overlay:v4.4.0-fix11649-t15t16-vsocktimeout@sha256:a8699a8705d95d2287685b59321e70a326cfdb19a54345524edadd6b3635e10c",
+    "shim_sha256": "82cd97b52ac89b6a73871d5ca68b61f840c5d84e030f28b72dc03f9baab9a73a"
+  },
+  "id": "kimi-k3.1-pro-kimi-k31-granian-mtls-45497390909-b8f8015d",
+  "image_ref": "ghcr.io/kubetee-ai/sglang:kimi-k31-granian-mtls-45497390909-b8f8015d@sha256:68cb8790dd1a959831f9bb10403c6f68142ddf9b5963722d3aa2b5b3f1cf59cb",
+  "initdata": {
+    "algorithm": "sha384",
+    "annotation": "io.katacontainers.config.hypervisor.cc_init_data",
+    "files": {
+      "aa.toml": "token_configs.kbs.url = https://kbs.kubetee.ai",
+      "cdh.toml": "kbc.name = cc_kbc, kbc.url = https://kbs.kubetee.ai",
+      "policy.rego": "agent_policy defaults; ExecProcessRequest=false, WriteStreamRequest=false, ReadStreamRequest=true"
+    },
+    "host_data_prefix32": "0484a58e5927efd31bf871c74bcc9f1768f4335bb92340176989b3c5b320f934",
+    "host_data_semantics": "kata4-sha384-uncompressed-initdata-toml-prefix32",
+    "kbs_url": "https://kbs.kubetee.ai",
+    "role": "image-gen",
+    "sha384": "0484a58e5927efd31bf871c74bcc9f1768f4335bb92340176989b3c5b320f9341d772b9e3e9c4fe4d824613cc19e6e0b"
+  },
+  "measurements": {
+    "mrconfigid": "hex:0484a58e5927efd31bf871c74bcc9f1768f4335bb92340176989b3c5b320f9341d772b9e3e9c4fe4d824613cc19e6e0b",
+    "mrtd": "hex:382d7bb61e152a5cc6eb22922a4dc9d33025211e24ec199fe38d6233c39cd86bf633e3c4f6e62393cf7ce6da91069ca0",
+    "rtmr0": "hex:14f01287aefb3ac196451163aa8cf68cc1635083b24eb317256288815a5b48bbe7cdf2e2395ebf0474b3e528d2004014",
+    "rtmr1": "hex:97fa8ac275f656b876de7c68709608bfe6ace60b58a3b8fb6e990c15bd8711ce8807ed86956f39b62afb9a9daee80227",
+    "rtmr2": "hex:77903a48ffcc66809d3f01a9853186ac08bc0081d06e4d05a0e0307450188e08d9f21b9c77e6747df0a90e65d7e3bff9",
+    "rtmr3": "hex:000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "model": "moonshotai/kimi-k3.1-pro",
+  "provenance": {
+    "_quote_minting_image": "The TDX quote whose MRTD/RTMR0-3/MRCONFIGID this record pins was minted by THIS image (run 45497390909, source b8f8015d3291). Source b8f8015d3291 adds the in-guest GET /kubetee/evidence route (root path) over the ab5a17e89e64 strict-mTLS transport. The in-app route does not affect the guest's launch registers (see measurements._capture), so an earlier transport-only canary and this one share identical MRTD/RTMR.",
+    "amd64_manifest_digest": "sha256:68cb8790dd1a959831f9bb10403c6f68142ddf9b5963722d3aa2b5b3f1cf59cb",
+    "build_run": "https://github.com/KubeTEE-AI/sglang/actions/runs/45497390909",
+    "image_ref": "ghcr.io/kubetee-ai/sglang:kimi-k31-granian-mtls-45497390909-b8f8015d@sha256:68cb8790dd1a959831f9bb10403c6f68142ddf9b5963722d3aa2b5b3f1cf59cb",
+    "pending_roll_image": "ghcr.io/kubetee-ai/sglang:kimi-k31-granian-mtls-45514864315-f3683545@sha256:8cb76869163f94ec190e3431a2f26e440da00e60e454f2fd7ce6ad504661c095 (source f3683545f8cf, run 45514864315) \u2014 adds the /v1/kubetee/evidence alias for the LiteLLM gateway relay path; same launch registers as above (in-app route), scheduled roll.",
+    "source_commit": "b8f8015d329182a8d973aacc71e3d7ca371a5e22",
+    "source_repo": "https://github.com/KubeTEE-AI/sglang",
+    "source_repo_note": "KubeTEE SGLang fork (public fork of sgl-project/sglang); default branch kubetee/mimo-penfix",
+    "superseded_canary": "ghcr.io/kubetee-ai/sglang:kimi-k31-granian-mtls-45228495550-bf52f822@sha256:d808dd7bec0d1ebb3f6942e47f636a69c57ec4d74497eaad4a81030da0a0437a (transport-only canary bf52f8223b88, run 45228495550) \u2014 the strict-mTLS transport validated live 2026-11-23; rolled out in favor of the quote-minting canary above.",
+    "transport_branch": "kubetee/kimi-k31-granian-mtls-day0",
+    "transport_fix_commit": "ab5a17e89e64",
+    "transport_overlay_base_images": [
+      {
+        "base": "sgl-project/sglang release/v0.5.23 @ 297e54fd105e974cdf401e5b4d20253a22c16f90",
+        "build_run": "https://github.com/KubeTEE-AI/sglang/actions/runs/45354817361",
+        "image_ref": "ghcr.io/kubetee-ai/sglang:mtls-297e54fd-20261124@sha256:c2be72ebf5b2d5c892add32ef4636858a303ff53c55a5df0b67bf88657c9a58b",
+        "model_layer_patches": "none",
+        "tag": "mtls-297e54fd-20261124"
+      },
+      {
+        "base": "sgl-project/sglang nightly-cu134-20261122-3117f58 @ 3117f5801752bfd8ea9aee8d3ba3dff8562378fd",
+        "build_run": "https://github.com/KubeTEE-AI/sglang/actions/runs/45359236784",
+        "image_ref": "ghcr.io/kubetee-ai/sglang:mtls-3117f580-20261124@sha256:7978ad60c3f7b64c24993eed747eeea1d0e1be6396f4bb9357a1c19934419348",
+        "model_layer_patches": "none",
+        "tag": "mtls-3117f580-20261124",
+        "upstream_base_image": "lmsysorg/sglang:nightly-cu134-20261122-3117f58@sha256:ffb8652016b1b895cd2dee12f6bffcb7a5fa65af71378e1018c9f702faa05063"
+      }
+    ],
+    "validated_at": "2026-11-25",
+    "validated_on": "kimi-k3-1-pro-sglang-b300-cc-0 (lu-b300-39)"
+  },
+  "role": "nim-terminator",
+  "runtime_class": "kata-qemu-nvidia-gpu-tdx-runtime-rs",
+  "status": "active",
+  "subject": "sglang-strict-mtls-backend",
+  "tee": "tdx"
+}

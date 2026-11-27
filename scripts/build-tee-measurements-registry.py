@@ -301,8 +301,16 @@ def build_registry(entries: list[dict]) -> dict:
 
 def sign_registry(registry: dict, key_pem: bytes) -> dict:
     unsigned = {k: v for k, v in registry.items() if k != "signature"}
-    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
-    from cryptography.hazmat.primitives.serialization import load_pem_private_key
+    try:
+        from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+        from cryptography.hazmat.primitives.serialization import load_pem_private_key
+    except ModuleNotFoundError as e:
+        raise SystemExit(
+            f"missing signing dependency ({e}) -- `pip install cryptography` in the "
+            "interpreter running this script, or use the Homebrew python "
+            "(/opt/homebrew/bin/python3.14, which ships it). The chain build and "
+            "self-check already passed; only signing needs this dependency."
+        ) from None
     key = load_pem_private_key(key_pem, password=None)
     if not isinstance(key, Ed25519PrivateKey):
         raise SystemExit("signing key is not Ed25519")
@@ -376,7 +384,14 @@ def main() -> None:
     if a.signing_key:
         key_pem = a.signing_key.encode() if a.signing_key.startswith("-----") else Path(a.signing_key).read_bytes()
     elif a.signing_key_file:
-        key_pem = a.signing_key_file.read_bytes()
+        key_path = Path(a.signing_key_file).expanduser()
+        if not key_path.is_file():
+            raise SystemExit(
+                f"signing key file not found: {key_path} -- pass --signing-key-file "
+                "/path/to/key.pem (the offline Ed25519 key). If it printed a path, "
+                "check the flag value is not empty (an unset $VAR expands to nothing)."
+            )
+        key_pem = key_path.read_bytes()
     elif os.environ.get("TEE_MEASUREMENTS_SIGNING_KEY"):
         key_pem = os.environ["TEE_MEASUREMENTS_SIGNING_KEY"].encode()
 
@@ -391,7 +406,9 @@ def main() -> None:
     a.out.write_text(json.dumps(registry, indent=2) + "\n")
     print(f"wrote {a.out} with {len(entries)} record(s):")
     for e in entries:
-        print(f"  [{e['status']}] {e['id']:32} model={e['model']} valid_until={e['valid_until']}")
+        # valid_until is OPTIONAL (spec §5: reserved for manual hard-expiry); absent = no expiry.
+        print(f"  [{e.get('status', '?')}] {e.get('id', '?'):32} "
+              f"model={e.get('model', '?')} valid_until={e.get('valid_until', '(none)')}")
 
 
 if __name__ == "__main__":
