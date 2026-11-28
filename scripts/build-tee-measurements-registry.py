@@ -41,12 +41,29 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import hashlib
 import json
 import os
 from pathlib import Path
 
 KEY_ID = "kubetee-measurements-2026-11-25"
 KEY_URL = "https://kubetee.ai/.well-known/tee-measurements-signing-key-2026.json"
+
+# -- registry anti-rollback: signed transition-hash chain (Phase 6, §3.2) -------
+# Each published revision carries a `chain` member binding it to the previous
+# revision's transition hash (Contrast-style manifest history):
+#   content_hash        = sha256(jcs(doc minus signature and chain))
+#   transition_hash     = sha256(TAG || framed(content_hash) || framed(previous_transition_hash))
+# where framed(x) = u64-be length || x and TAG is the ASCII domain-separation
+# string below. The Ed25519 signature covers the doc INCLUDING `chain`, so the
+# history cannot be spliced onto a signed record-set. A verifier that has ever
+# seen a transition hash / revision keeps it as its floor and rejects anything
+# served below it. Byte-identical construction to
+# kubetee-attestation-verifier (src/registry.rs) -- the known-answer vector in
+# tests/test_registry_chain.py pins the cross-language agreement.
+TRANSITION_TAG = b"kubetee.registry.transition/1"
+GENESIS_PREVIOUS = "00" * 32
+CHAIN_ALGORITHM = "sha256"
 # Retention: the top RETENTION_GENERATIONS (current + previous) immutable image
 # generations per chain stay active so BOTH verify through and after a rollout
 # (user decision 2026-11-26: measurements change only at rollout; the 90-day
@@ -68,6 +85,74 @@ def jcs(obj) -> bytes:
     """RFC 8785 (JCS) bytes -- the exact serialization the registry signs over.
     Sorted keys, no whitespace, UTF-8. Identical to publish-tee-measurements.py."""
     return json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()
+
+
+def _framed(part: bytes) -> bytes:
+    return len(part).to_bytes(8, "big") + part
+
+
+def content_hash(registry: dict) -> str:
+    """sha256 over the JCS of the doc minus `signature` and `chain` (hex)."""
+    unsigned = {k: v for k, v in registry.items() if k not in ("signature", "chain")}
+    return hashlib.sha256(jcs(unsigned)).hexdigest()
+
+
+def transition_hash(content_hex: str, previous_transition_hex: str) -> str:
+    """sha256 over TAG || framed(content_hash) || framed(previous) (hex)."""
+    preimage = TRANSITION_TAG + _framed(content_hex.encode()) + _framed(previous_transition_hex.encode())
+    return hashlib.sha256(preimage).hexdigest()
+
+
+def attach_chain(registry: dict, previous: dict | None) -> dict:
+    """Bind `registry` to the previously published revision and stamp `chain`.
+
+    - version = previous version + 1 (genesis: 1).
+    - previous_transition_hash = the previous revision's chain.transition_hash.
+      A predecessor WITHOUT a chain (pre-Phase-6 revision) is a chain bootstrap:
+      the new revision chains from GENESIS and says so (`bootstrap: true`) --
+      the pre-chain revision's content is still covered by the registry
+      signature history, it just has no computable transition hash.
+    - content_hash is computed BEFORE `chain` exists (it excludes `chain`), and
+      `version` is set first so it is inside the hashed content.
+    """
+    if previous is None:
+        version, prev_trans, bootstrap = 1, GENESIS_PREVIOUS, True
+    else:
+        version = int(previous.get("version") or 0) + 1
+        prev_chain = previous.get("chain") or {}
+        prev_trans = prev_chain.get("transition_hash") or GENESIS_PREVIOUS
+        bootstrap = not prev_chain.get("transition_hash")
+    registry["version"] = version
+    c = content_hash(registry)
+    t = transition_hash(c, prev_trans)
+    chain = {
+        "algorithm": CHAIN_ALGORITHM,
+        "content_hash": c,
+        "previous_transition_hash": prev_trans,
+        "transition_hash": t,
+    }
+    if previous is not None:
+        chain["previous_version"] = int(previous.get("version") or 0)
+    if bootstrap and previous is not None:
+        chain["bootstrap"] = True
+    registry["chain"] = chain
+    return registry
+
+
+def verify_chain(registry: dict) -> None:
+    """Self-check the chain member before writing (fail closed)."""
+    chain = registry.get("chain") or {}
+    for k in ("content_hash", "previous_transition_hash", "transition_hash"):
+        v = chain.get(k) or ""
+        if len(v) != 64 or any(c not in "0123456789abcdef" for c in v):
+            raise SystemExit(f"chain.{k} missing or not 64 lowercase hex chars")
+    c = content_hash(registry)
+    if c != chain["content_hash"]:
+        raise SystemExit(f"chain.content_hash mismatch: computed {c}, served {chain['content_hash']}")
+    t = transition_hash(chain["content_hash"], chain["previous_transition_hash"])
+    if t != chain["transition_hash"]:
+        raise SystemExit(f"chain.transition_hash mismatch: computed {t}, served {chain['transition_hash']}")
+    print("registry chain self-check: VERIFIED")
 
 
 def _b64e(b: bytes) -> str:
@@ -216,8 +301,16 @@ def build_registry(entries: list[dict]) -> dict:
 
 def sign_registry(registry: dict, key_pem: bytes) -> dict:
     unsigned = {k: v for k, v in registry.items() if k != "signature"}
-    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
-    from cryptography.hazmat.primitives.serialization import load_pem_private_key
+    try:
+        from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+        from cryptography.hazmat.primitives.serialization import load_pem_private_key
+    except ModuleNotFoundError as e:
+        raise SystemExit(
+            f"missing signing dependency ({e}) -- `pip install cryptography` in the "
+            "interpreter running this script, or use the Homebrew python "
+            "(/opt/homebrew/bin/python3.14, which ships it). The chain build and "
+            "self-check already passed; only signing needs this dependency."
+        ) from None
     key = load_pem_private_key(key_pem, password=None)
     if not isinstance(key, Ed25519PrivateKey):
         raise SystemExit("signing key is not Ed25519")
@@ -260,6 +353,10 @@ def main() -> None:
     ap.add_argument("--signing-key", help="Ed25519 PEM string")
     ap.add_argument("--signing-key-file", type=Path, help="Ed25519 PEM file (offline)")
     ap.add_argument("--out", type=Path, required=True)
+    ap.add_argument("--previous", type=Path,
+                    help="the previously published registry JSON (for the "
+                         "transition-hash chain). Defaults to the current "
+                         "contents of --out when present.")
     ap.add_argument("--require-signature", action="store_true", default=True,
                     help="fail closed if no signing key (default on)")
     a = ap.parse_args()
@@ -270,11 +367,31 @@ def main() -> None:
 
     registry = build_registry(entries)
 
+    # Anti-rollback chain: link this revision to the previously published one.
+    previous = None
+    prev_path = a.previous or (a.out if a.out.exists() else None)
+    if prev_path and prev_path.exists():
+        previous = json.loads(prev_path.read_text())
+        print(f"chain: linking to previous revision "
+              f"version={previous.get('version')} "
+              f"transition={(previous.get('chain') or {}).get('transition_hash', '(pre-chain bootstrap)')}")
+    else:
+        print("chain: genesis revision (previous_transition_hash = 64 zeros)")
+    registry = attach_chain(registry, previous)
+    verify_chain(registry)
+
     key_pem = None
     if a.signing_key:
         key_pem = a.signing_key.encode() if a.signing_key.startswith("-----") else Path(a.signing_key).read_bytes()
     elif a.signing_key_file:
-        key_pem = a.signing_key_file.read_bytes()
+        key_path = Path(a.signing_key_file).expanduser()
+        if not key_path.is_file():
+            raise SystemExit(
+                f"signing key file not found: {key_path} -- pass --signing-key-file "
+                "/path/to/key.pem (the offline Ed25519 key). If it printed a path, "
+                "check the flag value is not empty (an unset $VAR expands to nothing)."
+            )
+        key_pem = key_path.read_bytes()
     elif os.environ.get("TEE_MEASUREMENTS_SIGNING_KEY"):
         key_pem = os.environ["TEE_MEASUREMENTS_SIGNING_KEY"].encode()
 
@@ -289,7 +406,9 @@ def main() -> None:
     a.out.write_text(json.dumps(registry, indent=2) + "\n")
     print(f"wrote {a.out} with {len(entries)} record(s):")
     for e in entries:
-        print(f"  [{e['status']}] {e['id']:32} model={e['model']} valid_until={e['valid_until']}")
+        # valid_until is OPTIONAL (spec §5: reserved for manual hard-expiry); absent = no expiry.
+        print(f"  [{e.get('status', '?')}] {e.get('id', '?'):32} "
+              f"model={e.get('model', '?')} valid_until={e.get('valid_until', '(none)')}")
 
 
 if __name__ == "__main__":
